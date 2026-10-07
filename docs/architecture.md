@@ -21,6 +21,7 @@
 ```text
 src/
 ├── app/
+│   ├── index.ts                public API: App (импортирует корневой index.js)
 │   ├── App.tsx                 корневой компонент
 │   ├── providers/              SafeAreaProvider, NavigationContainer с темой
 │   ├── navigation/             RootStack по RootStackParamList из shared/config
@@ -63,7 +64,7 @@ src/
 
 | Слайс | Отвечает за | Public API (`index.ts`) | Импортирует |
 |-------|-------------|-------------------------|-------------|
-| `app` | провайдеры, навигация, тема по системной настройке (R-14), gate гидрации (R-9) | — | `pages/*`, `entities/post`, `entities/favorite` (только трекеры гидрации), `shared/config`, `shared/theme` |
+| `app` | провайдеры, навигация, тема по системной настройке (R-14), gate гидрации (R-9) | `App` — его импортирует корневой `index.js` и регистрирует через `AppRegistry` | `pages/*`, `entities/post`, `entities/favorite` (только трекеры гидрации), `shared/config`, `shared/theme` |
 | `pages/posts` | `PostsScreen`: рендерит `PostsList` и передаёт ему `onPostPress(id)`, который вызывает `navigate(ROUTES.Details, { postId })` (F-5). Навигацией управляют только страницы | `PostsScreen` | `widgets/posts-list`, `shared/config` |
 | `pages/details` | `DetailsScreen`: берёт `postId` из параметров маршрута, собирает данные поста, кнопку избранного и фоновую загрузку деталей (R-10) | `DetailsScreen` | `entities/post`, `features/toggle-favorite`, `features/load-post-details`, `shared/config`, `shared/ui` |
 | `widgets/posts-list` | `FlatList` с ключом `id` (I-7), без `refreshControl` (R-4); экраны loading / error / empty с Retry (I-1); сортировка (R-5, I-6). Получает `onPostPress(id)` пропсом, про навигацию не знает | `PostsList` | `features/load-posts`, `entities/post`, `entities/favorite`, `shared/ui` |

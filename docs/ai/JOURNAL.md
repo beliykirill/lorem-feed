@@ -211,7 +211,10 @@
 - Jest: `transformIgnorePatterns` с исключениями для `@faker-js`, React Navigation, screens, safe-area, MMKV, Nitro. Постоянный тест-заглушка `shared/config/navigation/routes.test.ts`.
 - Prettier: `.prettierignore` исключает `vendor/`, нативные папки, `.yarn/`, `yarn.lock` и `*.md`. Без него `yarn format` переформатировал бы гемы из `vendor/bundle` и документы. `prettier --check .` чистый.
 - CI: `.github/workflows/ci.yml` (Node из `.nvmrc`, `corepack enable`, `yarn install --immutable`, typecheck, lint, test). На GitHub не запускался: push делает автор.
-- Документы: `CLAUDE.md` (стек с точными версиями, правило `@/`), R-9, R-10, R-11, R-13 в `requirements.md`, разделы 1.1, 6.2, ADR-1, ADR-2, ADR-3 в `architecture.md`.
+- Документы:
+  - `CLAUDE.md`: стек с точными версиями, правило `@/`, правило об одобрении пакетов шаблона;
+  - `requirements.md`: R-9, R-10, R-11, R-13;
+  - `architecture.md`: разделы 1.1, 1.2, 1.3 (public API `app`), 6.2, ADR-1, ADR-2, ADR-3.
 
 ### Точные версии
 | Пакет | Версия |
@@ -262,6 +265,9 @@
 ### Сборка на платформах
 - **iOS:** `yarn ios` на iPhone 17 Pro (iOS 26.3) — сборка успешна, приложение стартует. Скриншот: [`04-scaffold-ios-posts.png`](screenshots/04-scaffold-ios-posts.png). Переход на Details на iOS не нажимался: в окружении нет инструмента для тапов в симуляторе. JS тот же, что на Android.
 - **Android:** `yarn android` на эмуляторе Pixel_8_Pro (API 37) — `BUILD SUCCESSFUL in 11m 7s`. Первая сборка долгая из-за CMake для Nitro и MMKV на четыре ABI. Переход Posts → Details работает. Скриншоты: [`04-scaffold-android-posts.png`](screenshots/04-scaffold-android-posts.png), [`04-scaffold-android-details.png`](screenshots/04-scaffold-android-details.png).
+- **Проблемы при запуске:**
+  - iOS — не было: первая сборка прошла без ошибок, повторная после смены bundle id тоже;
+  - Android — один системный запрос разрешения, см. «Проблемы и как решены».
 - **MMKV 4.3.2 + Nitro 0.37.1 с RN 0.87.1** собираются на обеих платформах. Это была проверка, перенесённая с этапа 3 (R-9).
 
 ### Проблемы и как решены
@@ -272,7 +278,10 @@
   - Metro: `ReactNativeFeatureFlags` вне `exports` у `react-native`;
   - Gradle: устаревшие `android.builtInKotlin` / `android.newDsl`.
 
-### Ревьюер: один прогон — 8 замечаний
+### Ревьюер: три прогона
+
+**Прогон 1** (до коммита каркаса) — 8 замечаний.
+
 | # | Замечание | Итог |
 |---|-----------|------|
 | 1 | ключ `types` в селекторах boundaries может не работать | опровергнуто проверкой lint (таблица выше) |
@@ -284,13 +293,81 @@
 | 7 | у iOS был bundle id из шаблона | `com.loremfeed`, как на Android, iOS пересобран |
 | 8 | дубли в `.gitignore` | убран добавленный агентом дубль `.idea/`; дубль `build/` — из шаблона, оставлен |
 
+**Прогон 2** (после коммита каркаса, по запросу автора) — 4 замечания, решения автора:
+
+| # | Замечание | Решение автора | Итог |
+|---|-----------|----------------|------|
+| 1 | в git лежат 5 файлов `.idea/` (из коммита автора `12f6ae6`), в `noctule.xml` локальный путь к Xcode | убрать из git отдельным коммитом | `git rm --cached -r .idea`, коммит `fbd0dea chore: remove IDE files from git`. `.gitignore:28` (`.idea`) их покрывает, проверено `git check-ignore` |
+| 2 | в architecture 1.2/1.3 у `app` нет public API, а `src/app/index.ts` экспортирует `App` для корневого `index.js` | поправить документ | 1.2 и 1.3 исправлены |
+| 3 | в Stack `CLAUDE.md` не названы пакеты шаблона (`@babel/*`, `@types/*`, `@react-native/*`, `cli-platform-*`), поэтому фраза «новых зависимостей вне стека нет» не обоснована | все пакеты шаблона RN CLI одобрены целиком | в Stack добавлено: «Everything installed by the RN CLI template is approved; the approval rule applies to packages added on top of it» |
+| 4 | нет экспорта сессии этапа 4 | экспорт делает автор | отмечено в «Артефактах» |
+
+**Прогон 3** (после правок) — все 4 решения подтверждены, 2 замечания к журналу:
+- в журнале нет коммита `fbd0dea`, второго прогона и решений по нему;
+- неточная формулировка про `postinstall` («Yarn/Corepack… как в шаблоне»).
+
+Оба исправлены в этой записи. Замечаний к коду и конфигам нет.
+
 ### Отклонения от запроса
-- Пункт 3 («алиасы по FSD-слоям») заменён автором на один алиас `@/`.
-- В запросе Yarn Berry отнесён к R-12, на деле это R-11. Работа шла по R-11.
-- `.nvmrc` фиксирует точную версию 24.14.0 (локальная), `engines` допускает диапазон из `CLAUDE.md`.
+- **Алиасы.** Пункт 3 просил «алиасы по FSD-слоям». Агент спросил, потому что это противоречило architecture 6.2, где алиасов не было. Автор заменил их одним алиасом `@/` → `src/` (раздел «Изменённое решение» выше).
+- **`eslint-plugin-boundaries`** — не отклонение. Он есть в запросе (пункт 4) и одобрен автором на этапе 3 (2026-10-08).
+- **«Исключение для тестов» (пункт 4)** сделано так: `override` снимает запрет faker для `enrich.test.ts` (и `enrich.ts`). Для `boundaries` отдельное исключение не понадобилось: тест рядом с модулем — тот же элемент, проверено (пример 8). Тестовые глобалы Jest уже даёт `@react-native` для `*.test.*`.
+- **Ссылка на требование.** В запросе Yarn Berry отнесён к R-12, на деле это R-11. Работа шла по R-11.
+- **`.nvmrc`** фиксирует точную версию 24.14.0 (локальная), `engines` допускает диапазон из `CLAUDE.md`.
+- **Сделано агентом без отдельного запроса:**
+  - `.prettierignore` и скрипт `format`;
+  - iOS bundle id `com.loremfeed` вместо шаблонного, по замечанию ревьюера;
+  - удалены демо-зависимости шаблона;
+  - faker-запрет расширен на подпути;
+  - `scripts/postinstall.js` ставит поды через Bundler (`bundle install`, `bundle exec pod install`). В шаблоне `postinstall` нет, но в инструкциях после `init` шаблон рекомендует ставить поды именно так.
+
+**Зависимости, добавленные к шаблону RN, с причиной.** Новых зависимостей вне одобренного стека нет.
+
+| Пакет | Тип | Причина | Одобрено |
+|-------|-----|---------|----------|
+| `@react-navigation/native`, `@react-navigation/native-stack` | dep | навигация (T-3) | стек, этап 1 |
+| `react-native-screens` | dep | peer native-stack | стек, этап 1 |
+| `react-native-safe-area-context` | dep | peer навигации; есть в шаблоне, версия поднята до 5.10.1 и зафиксирована | стек, этап 1 |
+| `@faker-js/faker` | dep | seed картинок (T-4, R-2) | стек, этап 1 |
+| `zustand` | dep | state-manager (T-5, R-9) | стек, этап 1 |
+| `react-native-mmkv`, `react-native-nitro-modules` | dep | хранилище persist (R-9); Nitro — peer MMKV | стек, этап 1 |
+| `eslint-plugin-boundaries` | dev | правило импортов FSD (R-10) | автор, этап 3 |
+| `babel-plugin-module-resolver` | dev | алиас `@/` в Metro и Jest | автор, этап 4 |
+| `eslint-import-resolver-typescript` | dev | резолв `@/` для `boundaries` | автор, этап 4 |
+
+Удалены из шаблона: `@react-native/new-app-screen`, `react-test-renderer`, `@types/react-test-renderer` — их использовали только демо-экран и демо-тест.
+
+### Ошибки агента и правки автора
+Свои ошибки агент нашёл сам или через ревьюера, до проверки автором. Ошибок агента автор на этом этапе не поправлял.
+
+| Ошибка агента | Кто нашёл | Исправление |
+|---------------|-----------|-------------|
+| `corepack use` запущен до создания `.yarnrc.yml`, зависимости встали в PnP | агент, по выводу Yarn | удалены файлы PnP, добавлен `nodeLinker`, установка повторена |
+| в черновике `.eslintrc.js` запрет «импорт вверх» включал свой слой; он запретил бы импорт соседнего слайса через `index.ts` и импорты внутри слайса | агент, при перечитывании конфига до первого запуска lint | запрет только для слоёв строго выше |
+| запрет faker покрывал только `@faker-js/faker`, а не подпути (`@faker-js/faker/locale/en`) | агент, при проверке бандла Metro | добавлены `patterns`, пример 6 проверяет оба пути |
+| iOS bundle id остался из шаблона | ревьюер | `com.loremfeed` |
+| дубль `.idea/` в `.gitignore` | ревьюер | убран |
+| ADR-2, ADR-3, R-9 не обновлены после проверок | ревьюер | обновлены |
+
+**Решения автора по вопросам агента:**
+- один алиас `@/` вместо алиасов по слоям и одобрение двух dev-зависимостей;
+- порядок проверки чистого клона: автор сам коммитит этап 3; агенту — один коммит каркаса; исправления по итогам клона — отдельным коммитом; без push.
 
 ### Чистый клон
-См. ниже: заполняется после коммита каркаса.
+Коммит `f5e34fe chore: scaffold React Native project`. Затем `git clone` локального репозитория во временную папку и проверки в ней:
+- `yarn install`: Yarn 4.18.1 из `packageManager`, 1 мин 46 с, включая `bundle install` и `pod install` в `postinstall`;
+- `yarn typecheck`, `yarn lint`, `yarn test`: зелёные (1 suite, 1 test).
+
+Ничего не упало, исправлять было нечего, коммита с исправлениями по итогам клона нет.
+
+**Коммиты этапа:**
+- `f5e34fe chore: scaffold React Native project`;
+- `fbd0dea chore: remove IDE files from git` — по решению автора после прогона 2 ревьюера, к чистому клону не относится.
+
+Запись журнала и правки документов после прогона 2 не закоммичены.
+
+Предупреждение Yarn `unrs-resolver lists build scripts, but all build scripts have been disabled`: в Yarn 4.18 `enableScripts` по умолчанию `false`. Скрипт `unrs-resolver` — только запасной путь на случай, если нет готового бинарника. Lint в клоне работает. Других зависимостей со скриптами установки нет. Собственный `postinstall` проекта выполняется.
 
 ### Артефакты
 - Каркас проекта (корень репозитория), [`docs/ai/prompts/04-scaffold.md`](prompts/04-scaffold.md), скриншоты `docs/ai/screenshots/04-scaffold-*`.
+- `docs/ai/sessions/04-scaffold.md` — экспорт сессии делает автор.

@@ -6,6 +6,7 @@ React Native take-home: a posts list, a post details screen, favorites pinned to
 
 ## Stack
 Exact versions are pinned in `package.json` (no ranges) and `yarn.lock`.
+Everything installed by the RN CLI template is approved; the approval rule applies to packages added on top of it.
 - React Native 0.87.1, React 19.2.3, bare React Native CLI 20.2.0, New Architecture on
 - TypeScript 6.0.3 (the version pinned by the RN template)
 - React Navigation 7: `@react-navigation/native` 7.5.0, `@react-navigation/native-stack` 7.20.0, plus peers `react-native-screens` 4.28.0, `react-native-safe-area-context` 5.10.1
