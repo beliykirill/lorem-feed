@@ -1,0 +1,62 @@
+# lorem-feed
+
+React Native take-home: a posts list, a post details screen, favorites pinned to the top. Data is fetched once and persisted across launches. All requirements and decisions live in the file below. Do not restate them, reference their IDs (F-*, D-*, I-*, R-*).
+
+@docs/requirements.md
+
+## Stack
+- React Native 0.87.1, bare React Native CLI, New Architecture on
+- TypeScript (the version pinned by the RN template)
+- React Navigation 7: `@react-navigation/native` 7.5.x, `@react-navigation/native-stack` 7.20.x, plus peers `react-native-screens`, `react-native-safe-area-context`
+- `@faker-js/faker` 10.6.x
+- `zustand` 5.0.x with `persist`
+- `react-native-mmkv` 4.3.x + `react-native-nitro-modules` 0.37.x
+- Jest, ESLint, Prettier (from the RN template)
+- Yarn Berry 4 via Corepack, `nodeLinker: node-modules`
+- Node `^22.13.0 || ^24.3.0`
+
+Versions are the latest on npm as of 2026-10-07. Exact versions get pinned at the scaffold stage.
+
+## Forbidden
+- Any `expo*` or `@expo/*` package.
+- Any dependency not listed above without the author's approval. Ask and wait.
+- RTK Query, TanStack Query.
+- Pull-to-refresh (`refreshControl`, `onRefresh`).
+- A data-reset button in the UI (R-4).
+
+## Architecture: FSD (R-10)
+Layers, top to bottom: `app → pages → widgets → features → entities → shared`.
+- A layer imports only from layers below it.
+- Cross-slice imports go only through the slice's public API (`index.ts`). No deep imports into another slice.
+- Inside a slice use relative imports.
+
+## Invariants
+1. `/posts` is fetched only until the first success, then never again (D-1, D-3, R-4).
+2. The image seed is generated once, during list enrichment, and stored with the post. Both picsum URLs are built from it. Nothing is generated during render (D-2, R-2).
+3. `/posts/{id}` is fetched only when the post's details are not cached. On error nothing is stored and the next open retries. After the first success it is never fetched again (R-3).
+4. The load / no-load decision is made only after the store has hydrated from MMKV (R-9).
+5. No pull-to-refresh, no data-reset button (R-4).
+
+## Commands
+```sh
+yarn install      # install deps (+ pod install on macOS)
+yarn ios
+yarn android
+yarn lint
+yarn typecheck    # tsc --noEmit
+yarn test
+```
+
+## Definition of done (every step)
+- `yarn typecheck`, `yarn lint`, `yarn test` are green.
+- `docs/ai/JOURNAL.md` is updated.
+
+## Languages
+- English: code, comments, commit messages, everything in `.claude/`, this file.
+- Russian: README, everything in `docs/` (including `docs/requirements.md` and `docs/ai/`).
+- UI: English only. Russian wording from the author describes meaning, not literal UI strings.
+
+## Process
+- Follow the `take-home` skill. After every stage stop and wait for the author's explicit confirmation.
+- Never resolve an ambiguity silently. Mark inferences as unconfirmed and ask.
+- Commit only when asked.
