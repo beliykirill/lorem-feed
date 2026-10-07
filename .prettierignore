@@ -1,0 +1,10 @@
+# Generated, vendored and native files
+vendor/
+ios/
+android/
+coverage/
+.yarn/
+yarn.lock
+
+# Documentation is formatted by hand
+*.md

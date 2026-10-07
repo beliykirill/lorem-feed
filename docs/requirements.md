@@ -167,7 +167,7 @@
   | `react-native-nitro-modules` | 0.37.1 | RN >= 0.75, Xcode >= 16.4, Swift >= 5.9, Android `compileSdkVersion` >= 34, NDK >= 27 |
   | `zustand` | 5.0.15 | — |
 
-  MMKV v4 — Nitro Module на JSI, без старого Bridge, так что с New Architecture он совместим. RN 0.87.1 укладывается в требования MMKV и Nitro. Нюанс: в devDependencies MMKV 4.3.2 собран и протестирован с RN 0.85.3, а не 0.87, а peer dependencies указаны как `*`, так что формальной гарантии для 0.87 нет. Окончательная проверка — сборка обеих платформ на первом этапе реализации. Если сборка не пройдёт, решение по версиям принимает автор.
+  MMKV v4 — Nitro Module на JSI, без старого Bridge, так что с New Architecture он совместим. RN 0.87.1 укладывается в требования MMKV и Nitro. Нюанс: в devDependencies MMKV 4.3.2 собран и протестирован с RN 0.85.3, а не 0.87, а peer dependencies указаны как `*`, так что формальной гарантии для 0.87 нет. Проверено на этапе каркаса 2026-10-08: с MMKV 4.3.2 и Nitro 0.37.1 приложение собирается и запускается на iOS (Xcode 26.3, симулятор) и Android (эмулятор, API 37).
 - API MMKV v4 для адаптера `persist`: `createMMKV()`, `getString(key)`, `set(key, value)`, `remove(key)` (в v4 `delete` переименован в `remove`). В пакете есть `createMockMMKV` — пригодится для Jest.
 - Запрос списка не уходит, пока все persist-сторы не завершили гидрацию из MMKV: иначе при повторном запуске список запросился бы повторно (D-3).
 - **Сторы.** Два persist-стора, по одному на сущность:
@@ -201,13 +201,14 @@ Feature-Sliced Design, адаптированный под React Native:
 - Карточка поста в `entities/post/ui` получает `isFavorite` пропсом и про стор избранного не знает.
 - `enrichPosts` не входит в public API `entities/post`. Наружу отдаются только операции «обогатить и сохранить»: `savePostList(dtos)` и `savePostDetails(postId, dto)`. Вместе с lint-запретом глубоких импортов это структурная гарантия того, что `enrichPosts` и faker нельзя вызвать напрямую снаружи слайса. То, что `savePostList` вызывается только в `features/load-posts`, — договорённость с проверкой ревьюером, lint-правила для неё нет.
 - Правило импортов закреплено lint-плагином `eslint-plugin-boundaries` (dev-зависимость, одобрена автором 2026-10-08): импорт только вниз по слоям, между слайсами одного слоя — только через public API. Плагин ловит и импорты через имя слоя, и относительные пути из соседнего слайса. Импорт внутренних модулей своего слайса разрешён, в том числе в тестах.
+- **Алиас `@/` → `src/`** (решение автора 2026-10-08, этап каркаса): импорты между слайсами и слоями пишутся как `@/entities/post`. Причина — читаемость импортов между слоями. Алиас один, отдельных алиасов по слоям нет; внутри слайса импорты относительные. Алиас задан в `tsconfig.json` (`paths`) и `babel.config.js` (`babel-plugin-module-resolver`, для Metro и Jest); `eslint-plugin-boundaries` резолвит его через `eslint-import-resolver-typescript`. Обе dev-зависимости одобрены автором 2026-10-08.
 - `pages/details` собирает `entities/post` (данные), `features/toggle-favorite` (кнопка) и `features/load-post-details`.
 - Типы маршрутов (`RootStackParamList`) и константы имён маршрутов лежат в `shared/config/navigation`, `app/navigation` и `pages` импортируют их оттуда. Навигацией управляют только `pages`: `widgets/posts-list` получает колбэк `onPostPress(id)` и про навигацию не знает.
 
 ### R-11. Установка и запуск (Q12)
 - Пакетный менеджер: Yarn Berry. Версия зафиксирована полем `packageManager` в `package.json` и включается через Corepack.
 - `nodeLinker: node-modules` в `.yarnrc.yml`: Plug'n'Play с React Native не работает.
-- `pod install` выполняется в `postinstall` и только на macOS.
+- `pod install` выполняется в `postinstall` и только на macOS: через Bundler (`bundle install`, `bundle exec pod install`), как рекомендует шаблон RN, — `Gemfile` фиксирует версию CocoaPods. Ruby и Bundler входят в окружение из официального гайда.
 - Установка: `yarn install`. Запуск: `yarn ios` / `yarn android`.
 - Считаем, что окружение (Xcode, Android SDK, эмулятор) у проверяющего уже настроено. В README — ссылка на официальный гайд по настройке окружения React Native.
 - На финальном этапе — собранный APK в GitHub Releases.
@@ -235,10 +236,10 @@ Feature-Sliced Design, адаптированный под React Native:
 - Lint-правила (ESLint из шаблона + одобренный `eslint-plugin-boundaries`), сообщения со ссылкой на инвариант:
   - `no-restricted-syntax`: JSX-атрибуты `onRefresh` и `refreshControl` (инвариант 5);
   - `no-restricted-properties`: `clearStorage`, `clearAll` (инвариант 5, нет сброса данных);
-  - `no-restricted-imports`: `@faker-js/faker` разрешён только в модуле обогащения постов (инвариант 2);
-  - `eslint-plugin-boundaries` (`boundaries/dependencies`): импорт вверх по слоям и глубокие импорты в чужой слайс (R-10). Совместимость с ESLint 8 и `.eslintrc.js` из шаблона RN 0.87.1 проверена. На этапе каркаса проверить на реальном конфиге три примера — импорт вверх, глубокий относительный импорт из соседнего слайса, глубокий импорт через имя слоя: все три должны давать ошибку.
+  - `no-restricted-imports`: `@faker-js/faker` и его подпути разрешены только в модуле обогащения постов (инвариант 2);
+  - `eslint-plugin-boundaries` (`boundaries/dependencies`): импорт вверх по слоям и глубокие импорты в чужой слайс (R-10). Совместимость с ESLint 8 и `.eslintrc.js` из шаблона RN 0.87.1 проверена. На этапе каркаса проверено на реальном конфиге: импорт вверх и глубокий импорт в чужой слайс дают ошибку и через алиас `@/`, и относительным путём.
 - Ревьюер дополнительно проверяет всё, но основная гарантия — тесты и lint. Исключения, которые проверяет ревьюер: часть инварианта 5 (в сторах нет action'а очистки, удаление ключа есть только в трекере) и договорённость «`savePostList` вызывается только в `features/load-posts`».
-- `@faker-js/faker` 10.6 распространяется только как ESM. На этапе каркаса: `@faker-js` в исключениях `transformIgnorePatterns` Jest и проверка сборки faker в Metro на обеих платформах.
+- `@faker-js/faker` 10.6 распространяется только как ESM. Сделано на этапе каркаса: `@faker-js` в исключениях `transformIgnorePatterns` Jest; faker собирается Metro для iOS и Android и компилируется `hermesc`.
 - Компонентные тесты и отдельные тесты api-слоя не пишем.
 - ESLint + Prettier, скрипт `typecheck` (`tsc --noEmit`).
 - CI на GitHub Actions: lint, typecheck, test.

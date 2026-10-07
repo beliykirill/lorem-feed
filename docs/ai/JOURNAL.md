@@ -194,3 +194,103 @@
 - [`docs/architecture.md`](../architecture.md)
 - [`docs/ai/prompts/03-architecture.md`](prompts/03-architecture.md)
 - `docs/ai/sessions/03-architecture.md` — экспорт сессии делает автор
+
+---
+
+## Этап 4. Каркас — 2026-10-08
+
+### Сделано
+- Проект создан через `npx @react-native-community/cli@20.2.0 init LoremFeed --version 0.87.1` во временной папке (шаблон `@react-native-community/template` 0.87.2, он ставит RN 0.87.1). Перенесён в корень через `rsync --ignore-existing`: `docs/`, `.claude/`, `CLAUDE.md`, `README.md` не тронуты.
+- Имя нативного проекта `LoremFeed`, отображаемое имя `lorem-feed`, идентификатор приложения `com.loremfeed` на обеих платформах.
+- Из шаблона удалены демо-части: `App.tsx`, `__tests__/App.test.tsx`, `@react-native/new-app-screen`, `react-test-renderer`, `@types/react-test-renderer`. Компонентных тестов в плане нет (R-13).
+- Тулчейн (R-11, I-10): `packageManager: yarn@4.18.1` (через `corepack use`), `.yarnrc.yml` с `nodeLinker: node-modules`, `.nvmrc` 24.14.0, `engines.node` `^22.13.0 || ^24.3.0`. `postinstall` → `scripts/postinstall.js`: на macOS `bundle install` и `bundle exec pod install`, на остальных ОС — выход.
+- Все версии в `package.json` точные, без диапазонов.
+- TypeScript: `strict: true` явно, `paths` `@/*` → `./src/*`. Babel: `babel-plugin-module-resolver` с `@` → `./src`. ESLint: резолвер `eslint-import-resolver-typescript` по `tsconfig.json`.
+- ESLint (`.eslintrc.js`): `@react-native` + `eslint-plugin-boundaries` (политики из architecture 6.2), запрет faker (`paths` + `patterns` для подпутей) с `override` для `enrich.ts` / `enrich.test.ts`, запрет `onRefresh` / `refreshControl`, `clearStorage` / `clearAll`.
+- FSD: `src/` с `index.ts` в каждом слайсе и модуле `shared`, навигация native-stack (`app/navigation/RootStack`, `app/providers/AppProviders`), типы маршрутов и `ROUTES` в `shared/config/navigation`, экраны-заглушки `PostsScreen` и `DetailsScreen`.
+- Jest: `transformIgnorePatterns` с исключениями для `@faker-js`, React Navigation, screens, safe-area, MMKV, Nitro. Постоянный тест-заглушка `shared/config/navigation/routes.test.ts`.
+- Prettier: `.prettierignore` исключает `vendor/`, нативные папки, `.yarn/`, `yarn.lock` и `*.md`. Без него `yarn format` переформатировал бы гемы из `vendor/bundle` и документы. `prettier --check .` чистый.
+- CI: `.github/workflows/ci.yml` (Node из `.nvmrc`, `corepack enable`, `yarn install --immutable`, typecheck, lint, test). На GitHub не запускался: push делает автор.
+- Документы: `CLAUDE.md` (стек с точными версиями, правило `@/`), R-9, R-10, R-11, R-13 в `requirements.md`, разделы 1.1, 6.2, ADR-1, ADR-2, ADR-3 в `architecture.md`.
+
+### Точные версии
+| Пакет | Версия |
+|-------|--------|
+| `react-native` / `react` | 0.87.1 / 19.2.3 |
+| `@react-native-community/cli` (+ platform-ios/android) | 20.2.0 |
+| `@react-native/*` (babel-preset, eslint-config, jest-preset, metro-config, typescript-config) | 0.87.1 |
+| `@react-navigation/native` / `native-stack` | 7.5.0 / 7.20.0 |
+| `react-native-screens` / `react-native-safe-area-context` | 4.28.0 / 5.10.1 |
+| `@faker-js/faker` | 10.6.0 |
+| `zustand` | 5.0.15 |
+| `react-native-mmkv` / `react-native-nitro-modules` | 4.3.2 / 0.37.1 |
+| `typescript` | 6.0.3 |
+| `eslint` / `prettier` / `jest` | 8.57.1 / 2.8.8 / 29.7.0 |
+| `eslint-plugin-boundaries` | 7.2.0 |
+| `babel-plugin-module-resolver` / `eslint-import-resolver-typescript` | 5.0.3 / 4.4.5 |
+| `@babel/core`, `@babel/preset-env`, `@babel/runtime` | 7.29.7 |
+| `@types/jest` / `@types/react` | 29.5.14 / 19.3.0 |
+| Yarn / Node (локально) | 4.18.1 / 24.14.0 |
+| Xcode / CocoaPods / JDK / Gradle | 26.3 / из `Gemfile.lock` / 21 / 9.4.1 |
+
+### Изменённое решение: алиас `@/`
+- **Было (этап 3):** алиасов нет, потому что `babel-plugin-module-resolver` не в стеке.
+- **Стало:** один алиас `@/` → `src/`, без алиасов по слоям. Решение автора 2026-10-08, причина — читаемость импортов между слоями. Одобрены dev-зависимости `babel-plugin-module-resolver` и `eslint-import-resolver-typescript`.
+- Запрос автора начинался с «алиасы по FSD-слоям». Агент спросил, потому что это противоречило архитектуре, и автор заменил их одним общим алиасом.
+
+### Проверка lint-правил на реальном конфиге
+Временные файлы в `src/`, `yarn eslint src`, после проверки файлы удалены.
+
+| # | Пример | Файл → импорт | Результат |
+|---|--------|---------------|-----------|
+| 1 | импорт вверх через алиас | `entities/post/model` → `@/features/load-posts` | ошибка «R-10: entities must not import upper layers» |
+| 2 | импорт вверх относительным путём | `entities/post/model` → `../../../features/load-posts` | та же ошибка |
+| 3 | `shared` → `entities` | `shared/ui` → `@/entities/post` | ошибка «R-10: shared must not import upper layers» |
+| 4 | глубокий импорт в чужой слайс через алиас | `widgets/posts-list/model` → `@/entities/post/lib/enrich` | ошибка «R-10: import another slice only through its public API (index.ts)» |
+| 5 | глубокий относительный импорт из соседнего слайса | `entities/favorite/model` → `../../post/lib/enrich` | та же ошибка |
+| 6 | faker вне модуля обогащения | `entities/favorite/model` → `@faker-js/faker` и `@faker-js/faker/locale/en` | ошибка «Invariant 2 (R-2)» (для подпути — через `patterns`) |
+| 7 | pull-to-refresh и сброс | `<FlatList onRefresh refreshControl>`, `storage.clearAll()` | две ошибки «Invariant 5 (R-4): no pull-to-refresh», одна «no data reset» |
+| 8 | контроль | faker в `entities/post/lib/enrich.ts` и `enrich.test.ts`; соседний слайс через index (`@/entities/post` и `../../post`); импорт вниз (`features` → `@/entities/post`, `@/shared/config/navigation`); относительный импорт внутри слайса; тест рядом с модулем | без ошибок |
+
+Итого 10 ошибок на 10 ожидаемых нарушений, ни одной на контрольных файлах. Ревьюер сомневался, что ключ `types` в селекторах `boundaries` валиден. Таблица это снимает: политики 1, 2 и 4 сработали со своими сообщениями.
+
+### faker: Jest и Metro
+- **Jest:** временный `src/entities/post/lib/enrich.test.ts` с `faker.seed` и `faker.string.alphanumeric` прошёл, затем удалён. Настоящий тест пишется на этапе 5.
+- **Metro:** временный entry с импортом faker. `react-native bundle --dev false` для `ios` и `android` собрался (~2,7 МБ), бандлы скомпилированы `hermesc` из `hermes-compiler` без ошибок.
+- **Наблюдение для этапа 5:** `import { faker } from '@faker-js/faker'` тянет все локали. Если взять `@faker-js/faker/locale/en`, бандл станет меньше. Lint-запрет покрывает оба пути.
+
+### Сборка на платформах
+- **iOS:** `yarn ios` на iPhone 17 Pro (iOS 26.3) — сборка успешна, приложение стартует. Скриншот: [`04-scaffold-ios-posts.png`](screenshots/04-scaffold-ios-posts.png). Переход на Details на iOS не нажимался: в окружении нет инструмента для тапов в симуляторе. JS тот же, что на Android.
+- **Android:** `yarn android` на эмуляторе Pixel_8_Pro (API 37) — `BUILD SUCCESSFUL in 11m 7s`. Первая сборка долгая из-за CMake для Nitro и MMKV на четыре ABI. Переход Posts → Details работает. Скриншоты: [`04-scaffold-android-posts.png`](screenshots/04-scaffold-android-posts.png), [`04-scaffold-android-details.png`](screenshots/04-scaffold-android-details.png).
+- **MMKV 4.3.2 + Nitro 0.37.1 с RN 0.87.1** собираются на обеих платформах. Это была проверка, перенесённая с этапа 3 (R-9).
+
+### Проблемы и как решены
+- **`corepack use` поставил зависимости в режиме PnP:** `.yarnrc.yml` ещё не было. Удалены `.pnp.cjs`, `.pnp.loader.mjs`, `.yarn/unplugged`, добавлен `nodeLinker: node-modules`, установка повторена.
+- **Запрос «nearby devices» при первом запуске на Android:** это `ACCESS_LOCAL_NETWORK` из debug-манифеста `react-android` 0.87.1, нужен для доступа к dev-серверу на Android 17. В release-манифест не попадает, в нашем манифесте только `INTERNET`. Ничего не меняли.
+- **Предупреждения, оставленные как есть, — все из зависимостей, не из нашего кода:**
+  - Yarn: peer-зависимости, которые неверно удовлетворены внутри `@react-native/eslint-config` и `@react-native/jest-preset` (typescript, `@babel/core`);
+  - Metro: `ReactNativeFeatureFlags` вне `exports` у `react-native`;
+  - Gradle: устаревшие `android.builtInKotlin` / `android.newDsl`.
+
+### Ревьюер: один прогон — 8 замечаний
+| # | Замечание | Итог |
+|---|-----------|------|
+| 1 | ключ `types` в селекторах boundaries может не работать | опровергнуто проверкой lint (таблица выше) |
+| 2 | ADR-2 не упоминает две новые dev-зависимости | исправлено |
+| 3 | ADR-3 описывал проверку faker в будущем времени | исправлено, результат записан |
+| 4 | результат сборки MMKV/Nitro не записан в R-9 и ADR-1 | исправлено |
+| 5 | решение этапа 3 «алиасов нет» не помечено как заменённое | раздел «Изменённое решение» выше |
+| 6 | `postinstall` вызывает `bundle install`, а R-11 говорит только о `pod install` | оставлено, как рекомендует шаблон: `Gemfile` фиксирует CocoaPods. R-11 уточнён |
+| 7 | у iOS был bundle id из шаблона | `com.loremfeed`, как на Android, iOS пересобран |
+| 8 | дубли в `.gitignore` | убран добавленный агентом дубль `.idea/`; дубль `build/` — из шаблона, оставлен |
+
+### Отклонения от запроса
+- Пункт 3 («алиасы по FSD-слоям») заменён автором на один алиас `@/`.
+- В запросе Yarn Berry отнесён к R-12, на деле это R-11. Работа шла по R-11.
+- `.nvmrc` фиксирует точную версию 24.14.0 (локальная), `engines` допускает диапазон из `CLAUDE.md`.
+
+### Чистый клон
+См. ниже: заполняется после коммита каркаса.
+
+### Артефакты
+- Каркас проекта (корень репозитория), [`docs/ai/prompts/04-scaffold.md`](prompts/04-scaffold.md), скриншоты `docs/ai/screenshots/04-scaffold-*`.

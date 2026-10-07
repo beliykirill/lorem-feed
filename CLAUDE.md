@@ -5,18 +5,18 @@ React Native take-home: a posts list, a post details screen, favorites pinned to
 @docs/requirements.md
 
 ## Stack
-- React Native 0.87.1, bare React Native CLI, New Architecture on
-- TypeScript (the version pinned by the RN template)
-- React Navigation 7: `@react-navigation/native` 7.5.x, `@react-navigation/native-stack` 7.20.x, plus peers `react-native-screens`, `react-native-safe-area-context`
-- `@faker-js/faker` 10.6.x
-- `zustand` 5.0.x with `persist`
-- `react-native-mmkv` 4.3.x + `react-native-nitro-modules` 0.37.x
-- Jest, ESLint, Prettier (from the RN template)
-- `eslint-plugin-boundaries` 7.x (dev, FSD import rules; approved 2026-10-08)
-- Yarn Berry 4 via Corepack, `nodeLinker: node-modules`
-- Node `^22.13.0 || ^24.3.0`
-
-Versions are the latest on npm as of 2026-10-07. Exact versions get pinned at the scaffold stage.
+Exact versions are pinned in `package.json` (no ranges) and `yarn.lock`.
+- React Native 0.87.1, React 19.2.3, bare React Native CLI 20.2.0, New Architecture on
+- TypeScript 6.0.3 (the version pinned by the RN template)
+- React Navigation 7: `@react-navigation/native` 7.5.0, `@react-navigation/native-stack` 7.20.0, plus peers `react-native-screens` 4.28.0, `react-native-safe-area-context` 5.10.1
+- `@faker-js/faker` 10.6.0
+- `zustand` 5.0.15 with `persist`
+- `react-native-mmkv` 4.3.2 + `react-native-nitro-modules` 0.37.1
+- Jest 29.7.0, ESLint 8.57.1, Prettier 2.8.8 (from the RN template)
+- `eslint-plugin-boundaries` 7.2.0 (dev, FSD import rules; approved 2026-10-08)
+- `babel-plugin-module-resolver` 5.0.3, `eslint-import-resolver-typescript` 4.4.5 (dev, the `@/` alias; approved 2026-10-08)
+- Yarn 4.18.1 via Corepack, `nodeLinker: node-modules`
+- Node `^22.13.0 || ^24.3.0` (`.nvmrc`: 24.14.0)
 
 ## Forbidden
 - Any `expo*` or `@expo/*` package.
@@ -30,6 +30,7 @@ Layers, top to bottom: `app → pages → widgets → features → entities → 
 - A layer imports only from layers below it.
 - Cross-slice imports go only through the slice's public API (`index.ts`). No deep imports into another slice.
 - Inside a slice use relative imports.
+- Across slices and layers import via the `@/` alias (`@/entities/post`). It is set in `tsconfig.json` and `babel.config.js`; keep them in sync.
 
 ## Invariants
 1. `/posts` is fetched only until the first success, then never again. Success means a non-empty, valid list; an empty or invalid response is not a success and stores nothing (D-1, D-3, R-4).
