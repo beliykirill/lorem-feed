@@ -12,6 +12,7 @@ React Native take-home: a posts list, a post details screen, favorites pinned to
 - `zustand` 5.0.x with `persist`
 - `react-native-mmkv` 4.3.x + `react-native-nitro-modules` 0.37.x
 - Jest, ESLint, Prettier (from the RN template)
+- `eslint-plugin-boundaries` 7.x (dev, FSD import rules; approved 2026-10-08)
 - Yarn Berry 4 via Corepack, `nodeLinker: node-modules`
 - Node `^22.13.0 || ^24.3.0`
 
@@ -31,10 +32,10 @@ Layers, top to bottom: `app → pages → widgets → features → entities → 
 - Inside a slice use relative imports.
 
 ## Invariants
-1. `/posts` is fetched only until the first success, then never again (D-1, D-3, R-4).
-2. The image seed is generated once, during list enrichment, and stored with the post. Both picsum URLs are built from it. Nothing is generated during render (D-2, R-2).
+1. `/posts` is fetched only until the first success, then never again. Success means a non-empty, valid list; an empty or invalid response is not a success and stores nothing (D-1, D-3, R-4).
+2. The image seed is generated once, during list enrichment, and stored with the post. Both picsum URLs are built from the stored seed by a pure function. Faker is never called and no seed is generated during render (D-2, R-2).
 3. `/posts/{id}` is fetched only when the post's details are not cached. On error nothing is stored and the next open retries. After the first success it is never fetched again (R-3).
-4. The load / no-load decision is made only after the store has hydrated from MMKV (R-9).
+4. The load / no-load decision is made only after every persist store has finished hydrating from MMKV, successfully or after recovery. The hydration gate guarantees it: navigation and all screens render only after the gate opens (R-9).
 5. No pull-to-refresh, no data-reset button (R-4).
 
 ## Commands

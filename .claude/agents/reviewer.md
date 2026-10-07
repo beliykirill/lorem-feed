@@ -33,6 +33,8 @@ Layer order, top to bottom: `app → pages → widgets → features → entities
 - A load decision made before store hydration.
 - `refreshControl`, `onRefresh`, or anything else that refetches the list.
 - A data-reset button or action in the UI (R-4).
+- A store action that clears persisted data, or `removeItem` / MMKV `remove` called anywhere except the hydration tracker in `shared/lib/storage` (the `StateStorage` adapter implementing `removeItem → remove` for `persist` is allowed) (invariant 5, structural guarantee: docs/architecture.md section 6).
+- `savePostList` called anywhere except `features/load-posts` (invariant 2, convention: docs/architecture.md section 6).
 - `package.json`: any `expo*` or `@expo/*` package, any dependency outside the stack in CLAUDE.md, RTK Query or TanStack Query.
 - Non-English UI strings.
 
