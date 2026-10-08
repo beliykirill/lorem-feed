@@ -399,3 +399,14 @@
 - Gate стоит в `AppProviders` между `SafeAreaProvider` и `NavigationContainer`: пока он закрыт, не рендерится даже контейнер навигации (как в 4.1).
 - Gate и хук вынесены в отдельный файл `gate.ts`, чтобы тест импортировал только чистые функции и не тянул сторы.
 - **Временное отклонение от 3.3:** пока gate закрыт, показывается `View` с `flex: 1` без фона темы. `shared/theme` появится на этапе UI, тогда же появится и фон.
+
+### 5.3 features, селектор, заглушки
+
+Сделано: `features/load-posts` (`loadPosts` с зависимостями аргументом, `useLoadPosts`), `features/load-post-details` (`loadPostDetails` с `inFlight`, `useLoadPostDetails` с одним `Set` на модуль), `features/toggle-favorite` (`useToggleFavorite`, `ToggleFavoriteButton`), `widgets/posts-list` (`sortPosts`, `useSortedPosts`, `PostsList`). Тесты: `loadPosts.test.ts`, `loadPostDetails.test.ts`, `sortPosts.test.ts`.
+
+**Решения и отклонения:**
+- `useLoadPosts` возвращает `{ status, isListLoaded, retry }`, а не `{ status, retry }`, как в 4.2. По таблице 4.5 виджету нужен флаг `isListLoaded`: только он отличает «список» от «idle до эффекта». Через хук фичи виджет получает его, не читая стор напрямую.
+- `loadPosts` в dev-сборке логирует ошибку `fetchPosts` (`console.warn`), так же как `loadPostDetails`. Пользователь видит экран ошибки, а лог помогает при отладке.
+- Чистые модули (`loadPosts.ts`, `loadPostDetails.ts`, `sortPosts.ts`) импортируют из `@/entities/*` только типы (`import type`). Тесты не загружают сторы.
+- **Заглушки UI для ручной проверки** (по запросу автора): `PostsList` — голый `FlatList` (ключ `id`, без refresh-пропсов), в строке ★/☆ текстом и заголовок, состояния loading / error / empty текстом и кнопкой Retry. `ToggleFavoriteButton` — RN `Button` «★ In favorites» / «☆ Add to favorites». `DetailsScreen` — заголовок из `usePostView`, кнопка и `useLoadPostDetails`. `StarIcon`, `PostCard`, `StateView`, `RemoteImage`, анимация и тема — этап UI.
+- Проверка бандла: `react-native bundle --platform ios --dev false` собирается, размер всего бандла 1,4 МБ (в ADR-3 оценка бандла с корневым импортом faker — около 2,7 МБ). Импорт подпути `@faker-js/faker/locale/base` Metro резолвит через `exports` пакета.

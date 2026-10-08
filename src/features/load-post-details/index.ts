@@ -1,2 +1,1 @@
-// Public API of the slice. Filled in at the data & state and UI stages.
-export {};
+export { useLoadPostDetails } from './model/useLoadPostDetails';
