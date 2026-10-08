@@ -533,3 +533,9 @@
 - Отклонение от плана: у `StateView` пропсы `actionTitle` / `onAction` вместо `onRetry`, чтобы ErrorBoundary переиспользовал его с «Try again». По умолчанию `actionTitle = 'Retry'`.
 - Тема навигации собирается в `app/providers/navigation-theme.ts` из `DefaultTheme` / `DarkTheme` и палитры, чтобы `shared/theme` не зависел от React Navigation.
 - `StatusBar` из RN core по `isDark`; gate получил фон темы.
+
+### 6.2 PostsScreen
+- `entities/post/ui/PostCard`: `React.memo` с примитивными пропсами; аватар 32×32, `title` в 1 строку, `body` в 2 строки; у избранного — фон `favoriteBackground` и ★ справа. Подпись для скринридера — заголовок, у избранного с «, favorite».
+- `PostsList`: состояния через `StateView` — спиннер, «Something went wrong» + Retry, «No posts» + Retry (текст ошибки выбрал агент). Стабильные `renderItem` (`useCallback`) и `keyExtractor` (уровень модуля), нижний отступ `insets.bottom`.
+- В public API `entities/post` добавлены `PostCard` и `IMAGE_SIZE` (нужен DetailsScreen для картинки 300×300).
+- Позиция скролла: native-stack держит PostsScreen смонтированным под деталями, кода не нужно; проверяется вручную.

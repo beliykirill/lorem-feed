@@ -1,64 +1,58 @@
-import {
-  Button,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { useCallback } from 'react';
+import { FlatList, type ListRenderItem } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { PostCard } from '@/entities/post';
 import { useLoadPosts } from '@/features/load-posts';
+import { useTheme } from '@/shared/theme';
+import { StateView } from '@/shared/ui';
 
+import type { SortedPost } from '../model/sort-posts';
 import { useSortedPosts } from '../model/use-sorted-posts';
 
 type Props = { onPostPress: (postId: number) => void };
 
+const keyExtractor = (post: SortedPost) => String(post.id);
+
 export function PostsList({ onPostPress }: Props) {
   const { status, isListLoaded, retry } = useLoadPosts();
   const posts = useSortedPosts();
+  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+
+  const renderItem: ListRenderItem<SortedPost> = useCallback(
+    ({ item }) => (
+      <PostCard
+        id={item.id}
+        title={item.title}
+        body={item.body}
+        thumbnailUrl={item.thumbnailUrl}
+        isFavorite={item.isFavorite}
+        onPress={onPostPress}
+      />
+    ),
+    [onPostPress],
+  );
 
   if (!isListLoaded) {
-    if (status === 'error' || status === 'empty') {
-      return (
-        <View style={styles.center}>
-          <Text>
-            {status === 'error' ? 'Something went wrong' : 'No posts'}
-          </Text>
-          <Button title="Retry" onPress={retry} />
-        </View>
-      );
+    if (status === 'error') {
+      return <StateView message="Something went wrong" onAction={retry} />;
     }
 
-    return (
-      <View style={styles.center}>
-        <Text>Loading…</Text>
-      </View>
-    );
+    if (status === 'empty') {
+      return <StateView message="No posts" onAction={retry} />;
+    }
+
+    return <StateView loading />;
   }
 
   return (
     <FlatList
       data={posts}
-      keyExtractor={post => String(post.id)}
-      renderItem={({ item }) => (
-        <Pressable style={styles.row} onPress={() => onPostPress(item.id)}>
-          <Text>{item.isFavorite ? '★' : '☆'}</Text>
-          <Text style={styles.title} numberOfLines={1}>
-            {item.title}
-          </Text>
-        </Pressable>
-      )}
+      keyExtractor={keyExtractor}
+      renderItem={renderItem}
+      style={{ backgroundColor: colors.background }}
+      contentContainerStyle={{ paddingBottom: insets.bottom }}
     />
   );
 }
-
-const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
-  row: {
-    flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  title: { flex: 1 },
-});

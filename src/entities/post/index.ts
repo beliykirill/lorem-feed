@@ -7,3 +7,5 @@ export { selectDetails, selectPost } from './model/selectors';
 export { usePostView } from './model/use-post-view';
 export type { PostView } from './model/use-post-view';
 export { savePostDetails, savePostList } from './model/save';
+export { IMAGE_SIZE } from './config/image-sizes';
+export { PostCard } from './ui/post-card';
