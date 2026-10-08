@@ -16,6 +16,7 @@ Everything installed by the RN CLI template is approved; the approval rule appli
 - Jest 29.7.0, ESLint 8.57.1, Prettier 2.8.8 (from the RN template)
 - `eslint-plugin-boundaries` 7.2.0 (dev, FSD import rules; approved 2026-10-08)
 - `babel-plugin-module-resolver` 5.0.3, `eslint-import-resolver-typescript` 4.4.5 (dev, the `@/` alias; approved 2026-10-08)
+- `eslint-plugin-check-file` 2.8.0, `@stylistic/eslint-plugin` 3.1.0 (dev, code style rules; approved 2026-10-08). The last versions that support ESLint 8
 - Yarn 4.18.1 via Corepack, `nodeLinker: node-modules`
 - Node `^22.13.0 || ^24.3.0` (`.nvmrc`: 24.14.0)
 
@@ -32,6 +33,14 @@ Layers, top to bottom: `app → pages → widgets → features → entities → 
 - Cross-slice imports go only through the slice's public API (`index.ts`). No deep imports into another slice.
 - Inside a slice use relative imports.
 - Across slices and layers import via the `@/` alias (`@/entities/post`). It is set in `tsconfig.json` and `babel.config.js`; keep them in sync.
+
+## Code style
+Enforced by `yarn lint` (see `.eslintrc.js`): kebab-case file and folder names (`check-file`), blank lines between statements (`@stylistic/padding-line-between-statements`), Prettier formatting.
+
+Not enforced by lint:
+- File names are kebab-case, exports keep their own case: `posts-screen.tsx` exports `PostsScreen`.
+- Rename files with `git mv`.
+- A comment explains only "why": a non-obvious decision, a reference to an invariant, or a workaround for a library bug. No comments that restate the code, no file headers.
 
 ## Invariants
 1. `/posts` is fetched only until the first success, then never again. Success means a non-empty, valid list; an empty or invalid response is not a success and stores nothing (D-1, D-3, R-4).
