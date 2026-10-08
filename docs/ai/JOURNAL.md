@@ -390,3 +390,12 @@
 - Тип `onRehydrateStorage` трекера сделан generic (`<S>() => (state: S | undefined, error?) => void`). С `state: unknown` TypeScript выводил из него тип состояния `persist` как `unknown`, и сторы не типизировались.
 - В Jest `createMMKV` сам возвращает мок (проверка `isTest()` в `react-native-mmkv` 4.3.2), отдельный `jest.mock` не нужен.
 - Тест трекера работает на реальном `persist` с хранилищем в памяти. Ветка «`migrate` бросает» проверяется так: сохранено `version: 1`, у стора `version: 2`.
+
+### 5.2 Gate гидрации
+
+Сделано: `app/hydration/model/hydrationGate.ts` (`isGateOpen`, `createHydrationGate`, чистые, без React), `app/hydration/model/gate.ts` (объект gate на уровне модуля с трекерами `post` и `favorite`, `useStoresHydrated`), `app/hydration/ui/HydrationGate.tsx`. Тест: `hydrationGate.test.ts` с фейковыми трекерами.
+
+**Решения и отклонения:**
+- Gate стоит в `AppProviders` между `SafeAreaProvider` и `NavigationContainer`: пока он закрыт, не рендерится даже контейнер навигации (как в 4.1).
+- Gate и хук вынесены в отдельный файл `gate.ts`, чтобы тест импортировал только чистые функции и не тянул сторы.
+- **Временное отклонение от 3.3:** пока gate закрыт, показывается `View` с `flex: 1` без фона темы. `shared/theme` появится на этапе UI, тогда же появится и фон.
