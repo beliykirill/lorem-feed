@@ -410,3 +410,27 @@
 - Чистые модули (`loadPosts.ts`, `loadPostDetails.ts`, `sortPosts.ts`) импортируют из `@/entities/*` только типы (`import type`). Тесты не загружают сторы.
 - **Заглушки UI для ручной проверки** (по запросу автора): `PostsList` — голый `FlatList` (ключ `id`, без refresh-пропсов), в строке ★/☆ текстом и заголовок, состояния loading / error / empty текстом и кнопкой Retry. `ToggleFavoriteButton` — RN `Button` «★ In favorites» / «☆ Add to favorites». `DetailsScreen` — заголовок из `usePostView`, кнопка и `useLoadPostDetails`. `StarIcon`, `PostCard`, `StateView`, `RemoteImage`, анимация и тема — этап UI.
 - Проверка бандла: `react-native bundle --platform ios --dev false` собирается, размер всего бандла 1,4 МБ (в ADR-3 оценка бандла с корневым импортом faker — около 2,7 МБ). Импорт подпути `@faker-js/faker/locale/base` Metro резолвит через `exports` пакета.
+
+### Ревьюер
+
+**Прогон 1** (после трёх коммитов подшагов): нарушений FSD и инвариантов нет, все 7 тест-файлов из 6.1 на месте и покрывают все случаи, все заявленные отклонения есть в журнале. 5 замечаний (все minor):
+
+| # | Замечание | Итог |
+|---|-----------|------|
+| 1 | фон темы у gate отсутствует | заявленное временное отклонение, закрывается на этапе UI |
+| 2 | `fetchJson` использует `response.json()`, а не `JSON.parse` (1.3), не записано | записано здесь: поведение то же (оба бросают на невалидном JSON), `response.json()` — стандартный путь `fetch` |
+| 3 | public API `shared/lib/storage` экспортирует ещё тип `HydrationTracker`, не записано | записано здесь: тип нужен `app/hydration/model/hydrationGate.ts`, это только тип |
+| 4 | `createMMKV({ id: 'lorem-feed' })` вместо `createMMKV()` | исправлено по документу: `createMMKV()` |
+| 5 | `savePostList` вызывался вне `try`: при исключении (обогащение, запись в хранилище) `listStatus` навсегда оставался `loading`, guard блокировал Retry, промис отклонялся без обработки | исправлено: `savePostList` внутри `try`, исключение → `error`, повтор возможен. Добавлен тест «сохранение бросает → `error`, повтор сохраняет». Инвариант 1 не нарушался: при исключении ничего не сохранялось |
+
+Итог: typecheck / lint / test зелёные, 8 suites, 44 теста.
+
+### Коммиты этапа
+- `5fc025f feat: add post and favorite entities with persisted stores`
+- `99b10db feat: gate navigation on store hydration`
+- `da6f2c8 feat: add loading, favorite toggle and sorted posts list`
+- `fix: recover posts loading when saving the list fails` — исправления по ревьюеру
+
+### Артефакты
+- `docs/ai/sessions/05-data-state.md` и `docs/ai/prompts/05-data-state.md` — экспорт сессии и извлечение промптов делает автор.
+- Ручной запуск на устройствах и скриншоты — не выполнялись на этом этапе (заглушки UI готовы для ручной проверки).

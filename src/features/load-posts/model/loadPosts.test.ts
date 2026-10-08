@@ -76,6 +76,21 @@ describe('loadPosts', () => {
     expect(deps.fetchPosts).toHaveBeenCalledTimes(2);
   });
 
+  it('sets error and allows retry when saving the list throws', async () => {
+    const { state, deps } = setup(async () => dtos);
+    deps.savePostList.mockImplementationOnce(() => {
+      throw new Error('write failed');
+    });
+
+    await loadPosts(deps);
+    expect(state.listStatus).toBe('error');
+    expect(state.isListLoaded).toBe(false);
+
+    await loadPosts(deps);
+    expect(deps.fetchPosts).toHaveBeenCalledTimes(2);
+    expect(state.isListLoaded).toBe(true);
+  });
+
   it('does not start a second request while one is loading', async () => {
     let resolve: (value: ValidatedPostDto[]) => void = () => {};
     const { deps } = setup(

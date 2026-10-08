@@ -22,20 +22,18 @@ export async function loadPosts({
   }
 
   setListStatus('loading');
-  let dtos: ValidatedPostDto[];
   try {
-    dtos = await fetchPosts();
+    const dtos = await fetchPosts();
+    if (dtos.length === 0) {
+      setListStatus('empty');
+      return;
+    }
+    savePostList(dtos);
   } catch (error) {
+    // Network, HTTP, validation, or a failed save: nothing is stored, retry is possible.
     if (__DEV__) {
       console.warn('Loading posts failed', error);
     }
     setListStatus('error');
-    return;
   }
-
-  if (dtos.length === 0) {
-    setListStatus('empty');
-    return;
-  }
-  savePostList(dtos);
 }
