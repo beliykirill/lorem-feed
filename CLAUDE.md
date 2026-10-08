@@ -35,7 +35,9 @@ Layers, top to bottom: `app → pages → widgets → features → entities → 
 - Across slices and layers import via the `@/` alias (`@/entities/post`). It is set in `tsconfig.json` and `babel.config.js`; keep them in sync.
 
 ## Code style
-Enforced by `yarn lint` (see `.eslintrc.js`): kebab-case file and folder names (`check-file`), blank lines between statements (`@stylistic/padding-line-between-statements`), Prettier formatting.
+Enforced by `yarn lint` (see `.eslintrc.js`): kebab-case file and folder names (`check-file`), blank lines between statements (`@stylistic/padding-line-between-statements`).
+
+Enforced by `yarn format:check` (`prettier --check .`, see `.prettierignore`): Prettier formatting. Lint does not check formatting: `@react-native` only turns off rules that conflict with Prettier. Fix with `yarn format`.
 
 Not enforced by lint:
 - File names are kebab-case, exports keep their own case: `posts-screen.tsx` exports `PostsScreen`.
@@ -57,10 +59,12 @@ yarn android
 yarn lint
 yarn typecheck    # tsc --noEmit
 yarn test
+yarn format:check # prettier --check .
+yarn format       # prettier --write .
 ```
 
 ## Definition of done (every step)
-- `yarn typecheck`, `yarn lint`, `yarn test` are green.
+- `yarn typecheck`, `yarn lint`, `yarn format:check`, `yarn test` are green.
 - `docs/ai/JOURNAL.md` is updated.
 
 ## Languages

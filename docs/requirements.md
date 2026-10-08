@@ -242,8 +242,8 @@ Feature-Sliced Design, адаптированный под React Native:
 - Ревьюер дополнительно проверяет всё, но основная гарантия — тесты и lint. Исключения, которые проверяет ревьюер: часть инварианта 5 (в сторах нет action'а очистки, удаление ключа есть только в трекере) и договорённость «`savePostList` вызывается только в `features/load-posts`».
 - `@faker-js/faker` 10.6 распространяется только как ESM. Сделано на этапе каркаса: `@faker-js` в исключениях `transformIgnorePatterns` Jest; faker собирается Metro для iOS и Android и компилируется `hermesc`.
 - Компонентные тесты и отдельные тесты api-слоя не пишем.
-- ESLint + Prettier, скрипт `typecheck` (`tsc --noEmit`).
-- CI на GitHub Actions: lint, typecheck, test.
+- ESLint + Prettier, скрипт `typecheck` (`tsc --noEmit`). Форматирование проверяет отдельный скрипт `format:check` (`prettier --check .`): lint его не проверяет, конфиг `@react-native` только отключает правила, конфликтующие с Prettier. `eslint-plugin-prettier` не добавляем, чтобы не расширять стек (решение автора 2026-10-08, этап 6).
+- CI на GitHub Actions: lint, typecheck, format:check, test.
 
 ### R-14. UX-детали (Q15, Q17, Q18)
 - Все тексты в UI на английском, README на русском. Русские формулировки в ответах автора описывают смысл, а не готовые строки для UI. Строки для UI пишутся по-английски (например, «Retry», «Add to favorites» / «Remove from favorites»).

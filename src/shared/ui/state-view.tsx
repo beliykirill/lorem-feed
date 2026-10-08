@@ -32,9 +32,7 @@ export function StateView({
     >
       {loading && <ActivityIndicator size="large" color={colors.primary} />}
       {message !== undefined && (
-        <Text
-          style={[typography.body, styles.message, { color: colors.text }]}
-        >
+        <Text style={[typography.body, styles.message, { color: colors.text }]}>
           {message}
         </Text>
       )}

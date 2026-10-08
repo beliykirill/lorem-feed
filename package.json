@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "postinstall": "node scripts/postinstall.js"
   },
   "dependencies": {

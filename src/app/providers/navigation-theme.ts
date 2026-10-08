@@ -21,6 +21,9 @@ function toNavigationTheme(base: NavigationTheme, colors: Colors) {
   };
 }
 
-export const lightNavigationTheme = toNavigationTheme(DefaultTheme, lightColors);
+export const lightNavigationTheme = toNavigationTheme(
+  DefaultTheme,
+  lightColors,
+);
 
 export const darkNavigationTheme = toNavigationTheme(DarkTheme, darkColors);
