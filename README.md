@@ -41,8 +41,8 @@ yarn test          # Jest
 Те же проверки запускает CI на GitHub Actions.
 
 ## Готовый APK
-- Скачать: [app-release.apk](https://github.com/beliykirill/lorem-feed/releases/download/v1.0.0/app-release.apk)
-- Страница релиза: [v1.0.0](https://github.com/beliykirill/lorem-feed/releases/tag/v1.0.0)
+- Скачать: [app-release.apk](https://github.com/beliykirill/lorem-feed/releases/download/v1.0.1/app-release.apk)
+- Страница релиза: [v1.0.1](https://github.com/beliykirill/lorem-feed/releases/tag/v1.0.1)
 
 Сборка подписана debug-ключом шаблона React Native и предназначена для проверки, не для публикации. При установке может понадобиться разрешить установку из неизвестных источников.
 
