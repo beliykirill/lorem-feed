@@ -15,7 +15,7 @@
 Предполагается, что окружение React Native уже настроено по официальному гайду: [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment).
 
 - Node `^22.13.0 || ^24.3.0` (в `.nvmrc` — 24.14.0).
-- Corepack включён: `corepack enable`. Нужная версия Yarn (4.18.1) берётся из поля `packageManager`, ставить Yarn отдельно не надо.
+- Yarn: подойдёт любой, в том числе глобальный Yarn 1. Yarn 4.18.1 лежит в репозитории (`.yarn/releases`, `yarnPath` в `.yarnrc.yml`), и `yarn` передаёт ему управление. Corepack (`corepack enable`) не обязателен: если он включён, версия берётся из поля `packageManager`, та же самая.
 - iOS (только macOS): Xcode, Ruby и Bundler. CocoaPods ставится через Bundler, версия зафиксирована в `Gemfile`.
 - Android: Android SDK и JDK по гайду, запущенный эмулятор или подключённое устройство.
 
