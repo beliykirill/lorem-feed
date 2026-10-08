@@ -522,3 +522,14 @@
 - после перезапуска запроса в сеть нет, избранное сохранено.
 
 Этот сценарий ещё не пройден ни на одной платформе.
+
+## Этап 6. UI — 2026-10-08
+
+План этапа утверждён автором: четыре подшага с отдельными коммитами, без новых зависимостей.
+
+### 6.1 Тема и shared/ui
+- `shared/theme`: палитры `lightColors` / `darkColors` с одинаковыми ключами, токены `spacing`, `radius`, `typography`, хук `useTheme` на `useColorScheme`. Значения цветов выбрал агент (дизайн произвольный, T-8).
+- `shared/ui`: `StarIcon` (★/☆, скрыт от скринридера), `RemoteImage` (фон `surface` как плейсхолдер; у картинок от 64 px — спиннер при загрузке и текст «Image unavailable» при ошибке; у 32×32 — только пустой фон, текст не помещается), `Button`, `StateView`.
+- Отклонение от плана: у `StateView` пропсы `actionTitle` / `onAction` вместо `onRetry`, чтобы ErrorBoundary переиспользовал его с «Try again». По умолчанию `actionTitle = 'Retry'`.
+- Тема навигации собирается в `app/providers/navigation-theme.ts` из `DefaultTheme` / `DarkTheme` и палитры, чтобы `shared/theme` не зависел от React Navigation.
+- `StatusBar` из RN core по `isDark`; gate получил фон темы.
