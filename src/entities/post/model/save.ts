@@ -10,11 +10,13 @@ export function savePostList(dtos: ValidatedPostDto[]): void {
 export function savePostDetails(postId: number, dto: ValidatedPostDto): void {
   const { posts, saveDetails } = usePostStore.getState();
   const post = posts.find(item => item.id === postId);
+
   // Unreachable today: details open only from the list. Without the post there is no seed.
   if (!post) {
     if (__DEV__) {
       console.warn(`Post ${postId} is not in the list, details are not saved`);
     }
+
     return;
   }
   saveDetails(postId, toPostDetails(dto, post));

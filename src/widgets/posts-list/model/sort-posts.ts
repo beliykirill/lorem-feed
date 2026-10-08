@@ -9,6 +9,7 @@ export function sortPosts(
 ): SortedPost[] {
   const favorite: SortedPost[] = [];
   const rest: SortedPost[] = [];
+
   for (const post of posts) {
     if (favorites[post.id] !== undefined) {
       favorite.push({ ...post, isFavorite: true });
@@ -17,5 +18,6 @@ export function sortPosts(
     }
   }
   favorite.sort((a, b) => favorites[b.id] - favorites[a.id]);
+
   return [...favorite, ...rest];
 }

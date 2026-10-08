@@ -11,6 +11,7 @@ type Props = NativeStackScreenProps<RootStackParamList, typeof ROUTES.Details>;
 export function DetailsScreen({ route }: Props) {
   const { postId } = route.params;
   const post = usePostView(postId);
+
   useLoadPostDetails(postId);
 
   return (

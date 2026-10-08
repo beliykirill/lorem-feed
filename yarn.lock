@@ -2529,6 +2529,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@stylistic/eslint-plugin@npm:3.1.0":
+  version: 3.1.0
+  resolution: "@stylistic/eslint-plugin@npm:3.1.0"
+  dependencies:
+    "@typescript-eslint/utils": "npm:^8.13.0"
+    eslint-visitor-keys: "npm:^4.2.0"
+    espree: "npm:^10.3.0"
+    estraverse: "npm:^5.3.0"
+    picomatch: "npm:^4.0.2"
+  peerDependencies:
+    eslint: ">=8.40.0"
+  checksum: 10c0/e593d78103a89e0555c119625c0ba8c80c8d2c7add0e85215f6be9929002207067df53714785c2c75b8b9e6df774d25c7dead211aed89a57cb45b5cec902a19e
+  languageName: node
+  linkType: hard
+
 "@tybys/wasm-util@npm:^0.10.3":
   version: 0.10.4
   resolution: "@tybys/wasm-util@npm:0.10.4"
@@ -2774,7 +2789,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:8.71.1, @typescript-eslint/utils@npm:^8.0.0":
+"@typescript-eslint/utils@npm:8.71.1, @typescript-eslint/utils@npm:^8.0.0, @typescript-eslint/utils@npm:^8.13.0":
   version: 8.71.1
   resolution: "@typescript-eslint/utils@npm:8.71.1"
   dependencies:
@@ -4678,6 +4693,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-visitor-keys@npm:^4.2.0, eslint-visitor-keys@npm:^4.2.1":
+  version: 4.2.1
+  resolution: "eslint-visitor-keys@npm:4.2.1"
+  checksum: 10c0/fcd43999199d6740db26c58dbe0c2594623e31ca307e616ac05153c9272f12f1364f5a0b1917a8e962268fdecc6f3622c1c2908b4fcc2e047a106fe6de69dc43
+  languageName: node
+  linkType: hard
+
 "eslint-visitor-keys@npm:^5.0.0":
   version: 5.0.1
   resolution: "eslint-visitor-keys@npm:5.0.1"
@@ -4730,6 +4752,17 @@ __metadata:
   bin:
     eslint: bin/eslint.js
   checksum: 10c0/1fd31533086c1b72f86770a4d9d7058ee8b4643fd1cfd10c7aac1ecb8725698e88352a87805cf4b2ce890aa35947df4b4da9655fb7fdfa60dbb448a43f6ebcf1
+  languageName: node
+  linkType: hard
+
+"espree@npm:^10.3.0":
+  version: 10.4.0
+  resolution: "espree@npm:10.4.0"
+  dependencies:
+    acorn: "npm:^8.15.0"
+    acorn-jsx: "npm:^5.3.2"
+    eslint-visitor-keys: "npm:^4.2.1"
+  checksum: 10c0/c63fe06131c26c8157b4083313cb02a9a54720a08e21543300e55288c40e06c3fc284bdecf108d3a1372c5934a0a88644c98714f38b6ae8ed272b40d9ea08d6b
   languageName: node
   linkType: hard
 
@@ -6738,6 +6771,7 @@ __metadata:
     "@react-native/typescript-config": "npm:0.87.1"
     "@react-navigation/native": "npm:7.5.0"
     "@react-navigation/native-stack": "npm:7.20.0"
+    "@stylistic/eslint-plugin": "npm:3.1.0"
     "@types/jest": "npm:29.5.14"
     "@types/react": "npm:19.3.0"
     babel-plugin-module-resolver: "npm:5.0.3"
@@ -7681,7 +7715,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"picomatch@npm:^4.0.4":
+"picomatch@npm:^4.0.2, picomatch@npm:^4.0.4":
   version: 4.0.7
   resolution: "picomatch@npm:4.0.7"
   checksum: 10c0/beb6ae02c43ae44e84883b90830196d9046b1726ead292adcf7f57945e0bb0d992d68563d87e03b484b6f3c9a5c6defda7523477f047d7f0e663f126cc01787f

@@ -13,6 +13,7 @@ export const SEED_LENGTH = 10;
 export function enrichPosts(dtos: ValidatedPostDto[]): Post[] {
   return dtos.map(dto => {
     const seed = faker.string.alphanumeric(SEED_LENGTH);
+
     return {
       ...mapPostDto(dto),
       seed,

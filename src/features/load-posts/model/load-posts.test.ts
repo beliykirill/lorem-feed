@@ -13,23 +13,28 @@ function setup(fetchPosts: LoadPostsDeps['fetchPosts']) {
       state.listStatus = status;
     },
   };
+
   const savePostList = jest.fn(() => {
     state.isListLoaded = true;
     state.listStatus = 'idle';
   });
+
   const deps = {
     getState: () => state,
     fetchPosts: jest.fn(fetchPosts),
     savePostList,
   };
+
   return { state, deps };
 }
 
 describe('loadPosts', () => {
   let warn: jest.SpyInstance;
+
   beforeEach(() => {
     warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
+
   afterEach(() => warn.mockRestore());
 
   it('saves a non-empty list once and never fetches again', async () => {
@@ -78,6 +83,7 @@ describe('loadPosts', () => {
 
   it('sets error and allows retry when saving the list throws', async () => {
     const { state, deps } = setup(async () => dtos);
+
     deps.savePostList.mockImplementationOnce(() => {
       throw new Error('write failed');
     });
@@ -93,6 +99,7 @@ describe('loadPosts', () => {
 
   it('does not start a second request while one is loading', async () => {
     let resolve: (value: ValidatedPostDto[]) => void = () => {};
+
     const { deps } = setup(
       () =>
         new Promise(res => {
@@ -101,6 +108,7 @@ describe('loadPosts', () => {
     );
 
     const first = loadPosts(deps);
+
     await loadPosts(deps);
     expect(deps.fetchPosts).toHaveBeenCalledTimes(1);
 

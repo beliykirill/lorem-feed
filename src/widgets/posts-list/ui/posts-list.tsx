@@ -28,6 +28,7 @@ export function PostsList({ onPostPress }: Props) {
         </View>
       );
     }
+
     return (
       <View style={styles.center}>
         <Text>Loading…</Text>

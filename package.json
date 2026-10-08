@@ -36,6 +36,7 @@
     "@react-native/jest-preset": "0.87.1",
     "@react-native/metro-config": "0.87.1",
     "@react-native/typescript-config": "0.87.1",
+    "@stylistic/eslint-plugin": "3.1.0",
     "@types/jest": "29.5.14",
     "@types/react": "19.3.0",
     "babel-plugin-module-resolver": "5.0.3",

@@ -20,6 +20,7 @@ export async function loadPostDetails(
   inFlight.add(postId);
   try {
     const dto = await fetchPost(postId);
+
     savePostDetails(postId, dto);
   } catch (error) {
     if (__DEV__) {

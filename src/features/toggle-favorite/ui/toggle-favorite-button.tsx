@@ -6,6 +6,7 @@ type Props = { postId: number };
 
 export function ToggleFavoriteButton({ postId }: Props) {
   const { isFavorite, toggle } = useToggleFavorite(postId);
+
   return (
     <Button
       title={isFavorite ? '★ In favorites' : '☆ Add to favorites'}

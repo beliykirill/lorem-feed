@@ -15,6 +15,7 @@ export function createHydrationGate(trackers: readonly Tracker[]) {
       const unsubscribers = trackers.map(tracker =>
         tracker.subscribe(listener),
       );
+
       return () => unsubscribers.forEach(unsubscribe => unsubscribe());
     },
   };

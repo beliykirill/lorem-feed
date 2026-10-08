@@ -3,10 +3,12 @@ import { createHydrationGate, isGateOpen } from './hydration-gate';
 function createFakeTracker(done = false) {
   let isDone = done;
   const listeners = new Set<() => void>();
+
   return {
     isDone: () => isDone,
     subscribe: (listener: () => void) => {
       listeners.add(listener);
+
       return () => {
         listeners.delete(listener);
       };
@@ -35,6 +37,7 @@ describe('isGateOpen', () => {
   it('treats a tracker recovered after a hydration error as done', () => {
     // A real tracker sets the same flag after recovery, see create-hydration-tracker.test.ts.
     const recovered = createFakeTracker();
+
     recovered.finish();
     expect(isGateOpen([createFakeTracker(true), recovered])).toBe(true);
   });
@@ -46,7 +49,9 @@ describe('createHydrationGate', () => {
       createFakeTracker(true),
       createFakeTracker(true),
     ]);
+
     const listener = jest.fn();
+
     gate.subscribe(listener);
 
     expect(gate.getSnapshot()).toBe(true);
@@ -58,6 +63,7 @@ describe('createHydrationGate', () => {
     const second = createFakeTracker();
     const gate = createHydrationGate([first, second]);
     const listener = jest.fn();
+
     gate.subscribe(listener);
 
     first.finish();
@@ -72,6 +78,7 @@ describe('createHydrationGate', () => {
   it('unsubscribes from every tracker', () => {
     const trackers = [createFakeTracker(), createFakeTracker()];
     const unsubscribe = createHydrationGate(trackers).subscribe(jest.fn());
+
     expect(trackers.map(tracker => tracker.listenerCount())).toEqual([1, 1]);
 
     unsubscribe();

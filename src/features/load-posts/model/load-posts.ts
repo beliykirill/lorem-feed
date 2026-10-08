@@ -16,6 +16,7 @@ export async function loadPosts({
   savePostList,
 }: LoadPostsDeps): Promise<void> {
   const { isListLoaded, listStatus, setListStatus } = getState();
+
   if (isListLoaded || listStatus === 'loading') {
     return;
   }
@@ -23,8 +24,10 @@ export async function loadPosts({
   setListStatus('loading');
   try {
     const dtos = await fetchPosts();
+
     if (dtos.length === 0) {
       setListStatus('empty');
+
       return;
     }
     savePostList(dtos);

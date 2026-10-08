@@ -31,6 +31,7 @@ describe('validatePosts', () => {
 
   it('ignores extra fields and does not copy them', () => {
     const [post] = validatePosts([{ ...item, extra: true }]);
+
     expect(post).not.toHaveProperty('userId');
     expect(post).not.toHaveProperty('extra');
     expect(post).not.toBe(item);

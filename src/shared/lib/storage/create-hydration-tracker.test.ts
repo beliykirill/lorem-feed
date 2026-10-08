@@ -13,9 +13,11 @@ type State = { items: string[] };
 
 function createMemoryStorage(initial?: string) {
   const data = new Map<string, string>();
+
   if (initial !== undefined) {
     data.set(KEY, initial);
   }
+
   const storage: StateStorage = {
     getItem: key => data.get(key) ?? null,
     setItem: (key, value) => {
@@ -25,11 +27,13 @@ function createMemoryStorage(initial?: string) {
       data.delete(key);
     },
   };
+
   return { storage, data };
 }
 
 function createStore(storage: StateStorage, migrate?: () => State) {
   const tracker = createHydrationTracker(storage, KEY);
+
   const store = create<State>()(
     persist((): State => ({ items: [] }), {
       name: KEY,
@@ -39,14 +43,17 @@ function createStore(storage: StateStorage, migrate?: () => State) {
       onRehydrateStorage: tracker.onRehydrateStorage,
     }),
   );
+
   return { store, tracker };
 }
 
 describe('createHydrationTracker on real zustand persist', () => {
   let warn: jest.SpyInstance;
+
   beforeEach(() => {
     warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
+
   afterEach(() => warn.mockRestore());
 
   it('recovers from corrupt JSON: key removed, initial state, done', () => {
@@ -62,6 +69,7 @@ describe('createHydrationTracker on real zustand persist', () => {
   it('recovers when migrate throws: key removed, initial state, done', () => {
     const stored = JSON.stringify({ state: { items: ['old'] }, version: 1 });
     const { storage, data } = createMemoryStorage(stored);
+
     const { store, tracker } = createStore(storage, () => {
       throw new Error('migration failed');
     });
@@ -95,6 +103,7 @@ describe('createHydrationTracker on real zustand persist', () => {
     const { storage } = createMemoryStorage();
     const tracker = createHydrationTracker(storage, KEY);
     const listener = jest.fn();
+
     tracker.subscribe(listener);
 
     expect(tracker.isDone()).toBe(false);

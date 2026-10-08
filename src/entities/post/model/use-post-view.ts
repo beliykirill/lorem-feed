@@ -27,6 +27,7 @@ export function usePostView(id: number): PostView | undefined {
         imageUrl: buildImageUrl(post.seed, IMAGE_SIZE, IMAGE_SIZE),
       };
     }
+
     return undefined;
   }, [post, details]);
 }

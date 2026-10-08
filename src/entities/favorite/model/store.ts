@@ -25,9 +25,12 @@ export const useFavoriteStore = create<FavoriteState>()(
         set(({ favorites }) => {
           if (favorites[postId] !== undefined) {
             const rest = { ...favorites };
+
             delete rest[postId];
+
             return { favorites: rest };
           }
+
           return { favorites: { ...favorites, [postId]: Date.now() } };
         }),
     }),

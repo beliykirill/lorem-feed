@@ -7,6 +7,8 @@ const ENRICH_FILES = [
   'src/entities/post/lib/enrich.test.ts',
 ];
 
+const MULTILINE = ['multiline-const', 'multiline-let', 'multiline-expression'];
+
 const fakerRestriction = {
   paths: [
     {
@@ -25,7 +27,7 @@ const fakerRestriction = {
 module.exports = {
   root: true,
   extends: '@react-native',
-  plugins: ['boundaries', 'check-file'],
+  plugins: ['boundaries', 'check-file', '@stylistic'],
   settings: {
     'import/resolver': {
       typescript: { project: './tsconfig.json' },
@@ -57,6 +59,24 @@ module.exports = {
     'check-file/folder-naming-convention': [
       'error',
       { 'src/**/': 'KEBAB_CASE' },
+    ],
+    // The core rule is deprecated since ESLint 8.53. The last matching entry wins.
+    '@stylistic/padding-line-between-statements': [
+      'error',
+      { blankLine: 'always', prev: '*', next: 'return' },
+      { blankLine: 'always', prev: ['const', 'let', 'var'], next: '*' },
+      {
+        blankLine: 'always',
+        prev: 'expression',
+        next: ['const', 'let', 'var'],
+      },
+      {
+        blankLine: 'never',
+        prev: ['singleline-const', 'singleline-let'],
+        next: ['singleline-const', 'singleline-let'],
+      },
+      { blankLine: 'always', prev: '*', next: MULTILINE },
+      { blankLine: 'always', prev: MULTILINE, next: '*' },
     ],
     'no-restricted-imports': ['error', fakerRestriction],
     'no-restricted-syntax': [

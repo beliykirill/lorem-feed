@@ -15,13 +15,16 @@ const ids = (sorted: { id: number }[]) => sorted.map(post => post.id);
 describe('sortPosts', () => {
   it('keeps the API order without favorites', () => {
     const sorted = sortPosts(posts, {});
+
     expect(ids(sorted)).toEqual([1, 2, 3, 4, 5]);
     expect(sorted.every(post => !post.isFavorite)).toBe(true);
   });
 
   it('puts favorites first, most recently added on top, the rest in API order', () => {
     const sorted = sortPosts(posts, { 4: 100, 2: 300, 5: 200 });
+
     expect(ids(sorted)).toEqual([2, 5, 4, 1, 3]);
+
     expect(sorted.map(post => post.isFavorite)).toEqual([
       true,
       true,
@@ -41,6 +44,7 @@ describe('sortPosts', () => {
   it('does not mutate the input', () => {
     const input = [...posts];
     const snapshot = JSON.stringify(input);
+
     sortPosts(input, { 5: 1 });
     expect(JSON.stringify(input)).toBe(snapshot);
     expect(input.map(post => post.id)).toEqual([1, 2, 3, 4, 5]);

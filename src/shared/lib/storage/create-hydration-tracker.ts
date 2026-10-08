@@ -36,6 +36,7 @@ export function createHydrationTracker(
     isDone: () => done,
     subscribe: listener => {
       listeners.add(listener);
+
       return () => {
         listeners.delete(listener);
       };

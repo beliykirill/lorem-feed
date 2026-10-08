@@ -8,6 +8,7 @@ const dto: ValidatedPostDto = { id: POST_ID, title: 'title', body: 'body' };
 // An in-memory details cache: savePostDetails writes to it as the store does.
 function setup(fetchPost: LoadPostDetailsDeps['fetchPost']) {
   const cache: Record<number, PostDetails> = {};
+
   const deps = {
     getDetails: (postId: number) => cache[postId],
     fetchPost: jest.fn(fetchPost),
@@ -16,18 +17,22 @@ function setup(fetchPost: LoadPostDetailsDeps['fetchPost']) {
     }),
     inFlight: new Set<number>(),
   };
+
   return { cache, deps };
 }
 
 describe('loadPostDetails', () => {
   let warn: jest.SpyInstance;
+
   beforeEach(() => {
     warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
+
   afterEach(() => warn.mockRestore());
 
   it('does not fetch when the details are cached', async () => {
     const { cache, deps } = setup(async () => dto);
+
     cache[POST_ID] = { ...dto, imageUrl: 'url' };
 
     await loadPostDetails(POST_ID, deps);
@@ -78,6 +83,7 @@ describe('loadPostDetails', () => {
       loadPostDetails(POST_ID, deps),
       loadPostDetails(POST_ID, deps),
     ]);
+
     expect(deps.fetchPost).toHaveBeenCalledTimes(1);
     expect(deps.savePostDetails).toHaveBeenCalledTimes(1);
   });
