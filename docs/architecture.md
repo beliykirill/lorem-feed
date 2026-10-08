@@ -353,6 +353,12 @@ sequenceDiagram
 - **Альтернативы.** TanStack Query + persister: его модель stale/refetch пришлось бы отключать почти целиком (`staleTime: Infinity`, без refetch-on-focus и reconnect), а кэш хранился бы во втором месте рядом с Zustand. RTK Query: тянет Redux.
 - **Последствия.** Дедупликацию запросов и статусы пишем сами (4.2, 4.3). Это несколько строк, и они покрыты тестами (раздел 6).
 
+### ADR-6. FlatList, а не FlashList
+- **Контекст.** Список — 100 простых строк одинаковой структуры (I-7).
+- **Решение.** `FlatList` из React Native, с мемоизированными строками (раздел 9).
+- **Альтернативы.** `@shopify/flash-list`: переиспользует ячейки и быстрее на длинных и тяжёлых списках. При 100 простых строках выигрыша не будет, а новая нативная зависимость не оправдана.
+- **Последствия.** Если список вырастет, FlashList — первый кандидат на замену. Интерфейс `PostsList` от замены не меняется.
+
 ## 6. Проверки инвариантов
 
 У каждого инварианта указан способ проверки: юнит-тест, lint-правило или структурная гарантия (R-13). Юнит-тесты — только логика, Jest, api замокан, без компонентных тестов и отдельных тестов api-слоя. Сабагент `reviewer` дополнительно проверяет всё. Основная гарантия — тесты и lint, кроме двух явно отмеченных мест, которые проверяет ревьюер (6.3): часть инварианта 5 (нет action'а очистки, `removeItem` только в трекере) и договорённость «`savePostList` вызывается только в `features/load-posts`» (инвариант 2).
@@ -455,3 +461,27 @@ T-1, T-2, T-7, I-9, I-10, R-11, S-1 и S-2 отображены на этапы,
 ## 8. Открытые вопросы
 
 Открытых вопросов нет. Q19 закрыт в R-9, Q20 — в R-4.
+
+## 9. Задачи этапа 6 (решения автора 2026-10-08)
+
+Решения автора после анализа на этапе 5 записаны в R-14 (`requirements.md`). Здесь они разложены по модулям.
+
+| # | Задача | Модуль | Зависимость |
+|---|--------|--------|-------------|
+| 1 | Отступ снизу `insets.bottom` (Android в режиме edge-to-edge: `edgeToEdgeEnabled=true`, targetSdk 36) у списка (`contentContainerStyle`) и у экрана деталей | `widgets/posts-list/ui`, `pages/details` | нет, `react-native-safe-area-context` уже есть |
+| 2 | `StatusBar` из RN core, `barStyle` по `useColorScheme`. Опция `statusBarStyle` из native-stack не подходит: в `Info.plist` стоит `UIViewControllerBasedStatusBarAppearance = false` | `app/providers` | нет |
+| 3 | Accessibility. Строка: `accessibilityRole="button"`, подпись — заголовок и «, favorite» для избранного; символ ★/☆ скрыт от скринридера. Кнопка избранного: `accessibilityRole="button"`, `accessibilityState={{ selected: isFavorite }}`. Картинка 300×300: `accessible={false}` | `entities/post/ui/PostCard`, `features/toggle-favorite`, `shared/ui/StarIcon`, `pages/details` | нет |
+| 4 | Тема в `NavigationContainer` (светлая и тёмная, из палитры `shared/theme`) — как в 1.3 | `app/providers`, `shared/theme` | нет |
+| 5 | `ScrollView` для текста на DetailsScreen | `pages/details` | нет |
+| 6 | Мемоизация строк: `React.memo(PostCard)` с примитивными пропсами (`title`, `body`, `thumbnailUrl`, `isFavorite`), стабильные `renderItem` и `onPress`. `sortPosts` создаёт новые объекты, поэтому в строку передаются поля, а не объект | `entities/post/ui`, `widgets/posts-list/ui` | нет |
+| 7 | ErrorBoundary — классовый компонент. Fallback: сообщение и кнопка «Try again», которая сбрасывает состояние границы и перерисовывает дерево. Данные не сбрасываются (инвариант 5) | `app` | нет, `react-error-boundary` не нужен |
+| 8 | Заголовки: «Posts» у списка, фиксированный «Post» у деталей | `app/navigation` | нет |
+| 9 | Ручная проверка Android back (Details → Posts, выход с Posts, predictive back) | этап 6, ручная проверка | — |
+
+**Не делаем** (решение автора, причины — в журнале этапа 5):
+- `GestureHandlerRootView`: native-stack не требует gesture handler, жесты назад нативные;
+- `getItemLayout`: высота строки зависит от системного размера шрифта;
+- оптимизацию записи persist при `setListStatus`: объём мал.
+
+Список — `FlatList` (ADR-6).
+

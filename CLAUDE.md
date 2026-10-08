@@ -72,3 +72,4 @@ yarn test
 - Follow the `take-home` skill. After every stage stop and wait for the author's explicit confirmation.
 - Never resolve an ambiguity silently. Mark inferences as unconfirmed and ask.
 - Commit only when asked.
+- Never commit the `DEVELOPMENT_TEAM` setting in `ios/LoremFeed.xcodeproj/project.pbxproj`: it is the author's local signing setup. Stage files explicitly and leave that change unstaged. If other changes to that file are needed, ask first.
