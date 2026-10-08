@@ -1,2 +1,7 @@
-// Public API of the slice. Filled in at the data & state and UI stages.
-export {};
+export type { FavoritesMap } from './model/types';
+export {
+  favoriteStoreHydration,
+  selectIsFavorite,
+  useFavoriteStore,
+} from './model/store';
+export type { FavoriteState } from './model/store';

@@ -371,3 +371,22 @@
 ### Артефакты
 - Каркас проекта (корень репозитория), [`docs/ai/prompts/04-scaffold.md`](prompts/04-scaffold.md), скриншоты `docs/ai/screenshots/04-scaffold-*`.
 - `docs/ai/sessions/04-scaffold.md` — экспорт сессии делает автор.
+
+## Этап 5. Данные и состояние — 2026-10-08
+
+План этапа согласован с автором до начала работы: три подшага, после каждого — typecheck / lint / test и отдельный коммит.
+
+### 5.1 shared + entities
+
+Сделано: `shared/api` (`fetchJson`, `API_BASE_URL`), `shared/lib/storage` (`mmkvStorage`, `createHydrationTracker`), `entities/post` (DTO, валидация, маппер, `buildImageUrl`, обогащение, стор, селекторы, `usePostView`, `savePostList` / `savePostDetails`), `entities/favorite` (стор, `toggle`, `selectIsFavorite`). Тесты: `validate.test.ts`, `enrich.test.ts`, `createHydrationTracker.test.ts`.
+
+**Решения при реализации** (документ оставлял их на этап 5, план с ними одобрен автором):
+- **Точка импорта faker** (ADR-3): `@faker-js/faker/locale/base`. Для `string.alphanumeric` данные локали не нужны, а импорт из корня пакета тянет все локали. Lint-конфиг не менялся: override для `enrich.ts` снимает запрет faker целиком.
+- **Длина seed** (R-2): `SEED_LENGTH = 10`.
+- **Размеры картинок** вынесены в сегмент `entities/post/config/imageSizes.ts`. Иначе `usePostView` импортировал бы константу из `lib/enrich.ts` и тянул бы модуль с faker в путь рендера.
+- **`selectIsFavorite`** лежит рядом со стором в `entities/favorite/model/store.ts`. Отдельный файл для одного селектора не нужен.
+
+**Неочевидное:**
+- Тип `onRehydrateStorage` трекера сделан generic (`<S>() => (state: S | undefined, error?) => void`). С `state: unknown` TypeScript выводил из него тип состояния `persist` как `unknown`, и сторы не типизировались.
+- В Jest `createMMKV` сам возвращает мок (проверка `isTest()` в `react-native-mmkv` 4.3.2), отдельный `jest.mock` не нужен.
+- Тест трекера работает на реальном `persist` с хранилищем в памяти. Ветка «`migrate` бросает» проверяется так: сохранено `version: 1`, у стора `version: 2`.
