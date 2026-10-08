@@ -22,7 +22,7 @@
 src/
 ├── app/
 │   ├── index.ts                public API: App (импортирует корневой index.js)
-│   ├── App.tsx                 корневой компонент
+│   ├── app.tsx                 корневой компонент
 │   ├── providers/              SafeAreaProvider, StatusBar, NavigationContainer с темой (navigation-theme.ts)
 │   ├── error-boundary/         ErrorBoundary: fallback «Try again» без сброса данных
 │   ├── navigation/             RootStack по RootStackParamList из shared/config
@@ -65,7 +65,7 @@ src/
 
 | Слайс | Отвечает за | Public API (`index.ts`) | Импортирует |
 |-------|-------------|-------------------------|-------------|
-| `app` | провайдеры, навигация, тема по системной настройке (R-14), gate гидрации (R-9) | `App` — его импортирует корневой `index.js` и регистрирует через `AppRegistry` | `pages/*`, `entities/post`, `entities/favorite` (только трекеры гидрации), `shared/config`, `shared/theme` |
+| `app` | провайдеры, навигация, тема по системной настройке (R-14), gate гидрации (R-9) | `App` — его импортирует корневой `index.js` и регистрирует через `AppRegistry` | `pages/*`, `entities/post`, `entities/favorite` (только трекеры гидрации), `shared/config`, `shared/lib/storage` (тип `HydrationTracker`), `shared/theme`, `shared/ui` (`StateView` в ErrorBoundary) |
 | `pages/posts` | `PostsScreen`: рендерит `PostsList` и передаёт ему `onPostPress(id)`, который вызывает `navigate(ROUTES.Details, { postId })` (F-5). Навигацией управляют только страницы | `PostsScreen` | `widgets/posts-list`, `shared/config` |
 | `pages/details` | `DetailsScreen`: берёт `postId` из параметров маршрута, собирает данные поста, кнопку избранного и фоновую загрузку деталей (R-10) | `DetailsScreen` | `entities/post`, `features/toggle-favorite`, `features/load-post-details`, `shared/config`, `shared/theme`, `shared/ui` |
 | `widgets/posts-list` | `FlatList` с ключом `id` (I-7), без `refreshControl` (R-4); экраны loading / error / empty с Retry (I-1); сортировка (R-5, I-6). Получает `onPostPress(id)` пропсом, про навигацию не знает | `PostsList` | `features/load-posts`, `entities/post`, `entities/favorite`, `shared/theme`, `shared/ui` |
@@ -76,8 +76,8 @@ src/
 | `entities/favorite` | стор избранного `Record<id, addedAt>` (R-5, D-4) | типы, `useFavoriteStore`, `favoriteStoreHydration`, селекторы | `shared` |
 | `shared/api` | `fetchJson(url)`: GET, проверка `response.ok`, `JSON.parse`. Возвращает `unknown`, про сущности не знает (I-8) | `fetchJson`, `API_BASE_URL` | — |
 | `shared/config/navigation` | `RootStackParamList` (`Posts: undefined`, `Details: { postId: number }`) и константы `ROUTES`. Лежит в `shared`, чтобы `app` и `pages` импортировали типы маршрутов вниз | `RootStackParamList`, `ROUTES` | — |
-| `shared/lib/storage` | `createMMKV()`, адаптер `StateStorage` (`getItem → getString(key) ?? null`, `setItem → set`, `removeItem → remove`), `createHydrationTracker(storage, key)` (3.3). Трекер получает хранилище аргументом и к MMKV не привязан (I-8) | `mmkvStorage`, `createHydrationTracker` | — |
-| `shared/theme` | палитры `lightColors` / `darkColors`, токены `spacing`, `radius`, `typography`, `useTheme` на `useColorScheme` (R-14). Акцент избранного — `colors.star`, оттенок строки — `favoriteTint` (8% от `star`), отклик на нажатие — `pressed`; `primary` — для кнопок (R-6, R-7, R-14) | `useTheme`, токены | — |
+| `shared/lib/storage` | `createMMKV()`, адаптер `StateStorage` (`getItem → getString(key) ?? null`, `setItem → set`, `removeItem → remove`), `createHydrationTracker(storage, key)` (3.3). Трекер получает хранилище аргументом и к MMKV не привязан (I-8) | `mmkvStorage`, `createHydrationTracker`, тип `HydrationTracker` | — |
+| `shared/theme` | палитры `lightColors` / `darkColors`, токены `spacing`, `radius`, `typography`, `useTheme` на `useColorScheme` (R-14). Акцент избранного — `colors.star`, оттенок строки — `favoriteTint` (8% от `star`), отклик на нажатие — `pressed`; `primary` — для кнопок (R-6, R-7, R-14) | `useTheme`, тип `Theme`, `lightColors`, `darkColors` (нужны `app` для темы навигации), тип `Colors`, токены `spacing`, `radius`, `typography` | — |
 | `shared/ui` | `RemoteImage` (плейсхолдер при загрузке, fallback при ошибке, R-14), `StarIcon` (R-6, R-7), `Button`, `StateView` (спиннер, текст, кнопка Retry) | компоненты | `shared/theme` |
 
 **Почему сортировка в `widgets`, а не в `features`.** Сортировка объединяет две сущности (`post`, `favorite`) для отображения и не является действием пользователя. `features` в FSD — это действия (загрузить, переключить), а список с порядком и флагом `isFavorite` — часть виджета, который его показывает. В `entities` сортировку не кладём: тогда одна сущность зависела бы от другой.
@@ -250,7 +250,7 @@ sequenceDiagram
 5. Пустой массив → `setListStatus('empty')`, ничего не сохраняется (R-4).
 6. Иначе `savePostList(dtos)`: внутри `entities/post` `enrichPosts` (`mapPostDto` отбрасывает `userId`, добавляются seed и `thumbnailUrl`) → `saveList`. `posts` и `isListLoaded = true` записываются атомарно и попадают в MMKV.
 
-`useLoadPosts()` вызывает `loadPosts` в `useEffect` на mount и возвращает `{ status, retry }`. `retry` вызывает `loadPosts` повторно.
+`useLoadPosts()` вызывает `loadPosts` в `useEffect` на mount и возвращает `{ status, isListLoaded, retry }`. `retry` вызывает `loadPosts` повторно. `isListLoaded` нужен виджету: список показывается, если он уже загружен, иначе — состояние по `status`.
 
 ### 4.3 Открытие деталей
 
@@ -374,6 +374,7 @@ sequenceDiagram
 | `entities/post/lib/enrich.test.ts` | `enrichPosts` (вход — `ValidatedPostDto[]`): у каждого поста есть seed; `thumbnailUrl` = `buildImageUrl(seed, 32, 32)`; seed разные у разных постов. `toPostDetails(dto, post)`: `imageUrl` = `buildImageUrl(post.seed, 300, 300)`. Вместе: URL 32 и 300 строятся из одного seed. `faker.seed` фиксирован. Тест импортирует внутренний модуль своего слайса относительным путём (`./enrich`) |
 | `features/load-post-details/model/load-post-details.test.ts` | в кэше по `postId` → запроса нет; ошибка → ничего не сохранено, следующий вызов запрашивает; `fetchPost` отклонён из-за `id ≠ postId` → ничего не сохранено, следующий вызов запрашивает; успех → `savePostDetails(postId, dto)` вызван с запрошенным `postId`, следующий вызов не запрашивает; два параллельных вызова → один запрос |
 | `app/hydration/model/hydration-gate.test.ts` | `isGateOpen` (чистая): все трекеры завершены → `true`; хотя бы один нет → `false`; трекер «восстановлен после ошибки» считается завершённым. `createHydrationGate` (подписка): трекер завершился до подписки → `getSnapshot()` сразу `true` без события; завершение после подписки → подписчик уведомлён, снимок `true`; отписка снимает подписку со всех трекеров |
+| `shared/config/navigation/routes.test.ts` | `ROUTES` содержит ровно экраны корневого стека: `Posts` и `Details` |
 | `shared/lib/storage/create-hydration-tracker.test.ts` | на реальном `persist` из zustand 5.0.15, мок-хранилище передаётся в `createHydrationTracker(storage, key)` и в `persist`: битый JSON и исключение в `migrate` → ключ удалён, стор в начальном состоянии, `isDone() = true`; валидный JSON и пустое хранилище → данные применены, ключ не тронут, `isDone() = true` |
 
 ### 6.2 Lint-правила (ESLint из шаблона RN + `eslint-plugin-boundaries`, одобрен автором)

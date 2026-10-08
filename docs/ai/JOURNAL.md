@@ -583,3 +583,13 @@
 
 ### 6.9 Акцентный цвет
 В 6.5 и 6.6 агент понял «акцентный цвет» как цвет звезды `colors.star`, а не `primary`, и отметил это как неподтверждённое. Автор одобрил визуальный результат и попросил зафиксировать реализацию без изменения кода. Записано в R-14 (новый пункт «Акцентный цвет избранного»), ссылки из R-6 и R-7, `architecture.md` (таблица 1.3: `shared/theme`, `features/toggle-favorite`).
+
+### 6.10 `architecture.md` приведён к коду
+По замечаниям ревьюера:
+- в дереве 1.2 `App.tsx` → `app.tsx` (файлы в kebab-case с этапа 5);
+- в таблице 1.3 у `app` добавлены импорты `shared/lib/storage` (тип `HydrationTracker`) и `shared/ui` (`StateView` в ErrorBoundary);
+- в public API `shared/lib/storage` добавлен тип `HydrationTracker`, в public API `shared/theme` — `Theme`, `lightColors`, `darkColors`, `Colors` и токены;
+- в 4.2 `useLoadPosts` возвращает `{ status, isListLoaded, retry }`;
+- в 6.1 добавлен `routes.test.ts`.
+
+Код не менялся.
