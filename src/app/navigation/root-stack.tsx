@@ -12,7 +12,7 @@ export function RootStack() {
       <Stack.Screen
         name={ROUTES.Posts}
         component={PostsScreen}
-        options={{ title: 'Posts' }}
+        options={{ title: 'Posts', headerLargeTitleEnabled: true }}
       />
       <Stack.Screen
         name={ROUTES.Details}

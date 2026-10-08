@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '@/shared/theme';
 import { RemoteImage, StarIcon } from '@/shared/ui';
@@ -23,40 +23,58 @@ function PostCardRow({
   isFavorite,
   onPress,
 }: Props) {
-  const { colors, radius, spacing, typography } = useTheme();
+  const { colors, spacing, typography } = useTheme();
+  const background = isFavorite ? colors.favoriteTint : colors.background;
 
   return (
     <Pressable
       onPress={() => onPress(id)}
       accessibilityRole="button"
       accessibilityLabel={isFavorite ? `${title}, favorite` : title}
+      android_ripple={{ color: colors.pressed }}
       style={({ pressed }) => [
         styles.row,
         {
           gap: spacing.md,
-          paddingHorizontal: spacing.lg,
-          paddingVertical: spacing.md,
-          borderBottomColor: colors.border,
-          backgroundColor: isFavorite
-            ? colors.favoriteBackground
-            : colors.background,
-          opacity: pressed ? 0.7 : 1,
+          paddingLeft: spacing.lg,
+          backgroundColor:
+            pressed && Platform.OS === 'ios' ? colors.pressed : background,
         },
       ]}
     >
-      <RemoteImage uri={thumbnailUrl} size={THUMBNAIL_SIZE} radius={radius.sm} />
-      <View style={[styles.text, { gap: spacing.xs }]}>
-        <Text style={[typography.title, { color: colors.text }]} numberOfLines={1}>
-          {title}
-        </Text>
-        <Text
-          style={[typography.caption, { color: colors.textSecondary }]}
-          numberOfLines={2}
-        >
-          {body}
-        </Text>
+      <RemoteImage
+        uri={thumbnailUrl}
+        size={THUMBNAIL_SIZE}
+        radius={THUMBNAIL_SIZE / 2}
+      />
+      {/* The bottom border lives here so the separator starts at the text. */}
+      <View
+        style={[
+          styles.content,
+          {
+            gap: spacing.md,
+            paddingVertical: spacing.md,
+            paddingRight: spacing.lg,
+            borderBottomColor: colors.border,
+          },
+        ]}
+      >
+        <View style={[styles.text, { gap: spacing.xs }]}>
+          <Text
+            style={[typography.title, { color: colors.text }]}
+            numberOfLines={1}
+          >
+            {title}
+          </Text>
+          <Text
+            style={[typography.body, { color: colors.textSecondary }]}
+            numberOfLines={2}
+          >
+            {body}
+          </Text>
+        </View>
+        {isFavorite && <StarIcon filled size={18} />}
       </View>
-      {isFavorite && <StarIcon filled size={18} />}
     </Pressable>
   );
 }
@@ -65,9 +83,11 @@ function PostCardRow({
 export const PostCard = memo(PostCardRow);
 
 const styles = StyleSheet.create({
-  row: {
+  row: { flexDirection: 'row', alignItems: 'center' },
+  content: {
+    flex: 1,
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   text: { flex: 1 },

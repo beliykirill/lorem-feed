@@ -51,6 +51,7 @@ export function PostsList({ onPostPress }: Props) {
       data={posts}
       keyExtractor={keyExtractor}
       renderItem={renderItem}
+      contentInsetAdjustmentBehavior="automatic"
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={{ paddingBottom: insets.bottom }}
     />
