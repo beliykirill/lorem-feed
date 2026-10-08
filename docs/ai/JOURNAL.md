@@ -539,3 +539,8 @@
 - `PostsList`: состояния через `StateView` — спиннер, «Something went wrong» + Retry, «No posts» + Retry (текст ошибки выбрал агент). Стабильные `renderItem` (`useCallback`) и `keyExtractor` (уровень модуля), нижний отступ `insets.bottom`.
 - В public API `entities/post` добавлены `PostCard` и `IMAGE_SIZE` (нужен DetailsScreen для картинки 300×300).
 - Позиция скролла: native-stack держит PostsScreen смонтированным под деталями, кода не нужно; проверяется вручную.
+
+### 6.3 DetailsScreen
+- `ScrollView` с фоном темы и нижним отступом `insets.bottom + spacing.xl`; картинка 300×300 по центру (декоративная, скрыта от скринридера), `title`, `body`, под текстом кнопка избранного.
+- Пост не найден (путь недостижим: детали открываются только из списка) — `StateView` «Post not found» вместо прежнего `Post ${postId}`. Решение агента.
+- `ToggleFavoriteButton`: `Animated.View` со scale 1 → 0.95 на `onPressIn` (`timing`, 80 мс) и `spring` обратно на `onPressOut`, `useNativeDriver`. Неизбранное — контурная кнопка «☆ Add to favorites», избранное — залитая «★ In favorites». `accessibilityRole="button"`, `accessibilityState={{ selected }}`.
