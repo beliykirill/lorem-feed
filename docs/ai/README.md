@@ -19,3 +19,4 @@
 | 5. Данные и состояние | [`sessions/05-data.md`](sessions/05-data.md) | [`prompts/05-data.md`](prompts/05-data.md) | — |
 | 6. UI | [`sessions/06-ui.md`](sessions/06-ui.md) | [`prompts/06-ui.md`](prompts/06-ui.md) | скриншоты приложения: [`docs/screenshots/`](../screenshots/) |
 | 7. Финал | [`sessions/07-final.md`](sessions/07-final.md) | [`prompts/07-final.md`](prompts/07-final.md) | [`README.md`](../../README.md), [релиз v1.0.0 с APK](https://github.com/beliykirill/lorem-feed/releases/tag/v1.0.0) |
+| 8. Финальный аудит и доводка | [`sessions/08-audit-fixes.md`](sessions/08-audit-fixes.md) | [`prompts/08-audit-fixes.md`](prompts/08-audit-fixes.md) | запись этапа 8 в [`JOURNAL.md`](JOURNAL.md) |
