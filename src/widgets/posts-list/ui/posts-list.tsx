@@ -9,7 +9,7 @@ import {
 
 import { useLoadPosts } from '@/features/load-posts';
 
-import { useSortedPosts } from '../model/useSortedPosts';
+import { useSortedPosts } from '../model/use-sorted-posts';
 
 type Props = { onPostPress: (postId: number) => void };
 

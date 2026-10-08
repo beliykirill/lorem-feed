@@ -1,4 +1,4 @@
-import { createHydrationGate, isGateOpen } from './hydrationGate';
+import { createHydrationGate, isGateOpen } from './hydration-gate';
 
 function createFakeTracker(done = false) {
   let isDone = done;

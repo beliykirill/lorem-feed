@@ -1,6 +1,6 @@
 import type { ListStatus, ValidatedPostDto } from '@/entities/post';
 
-import { loadPosts, type LoadPostsDeps } from './loadPosts';
+import { loadPosts, type LoadPostsDeps } from './load-posts';
 
 const dtos: ValidatedPostDto[] = [{ id: 1, title: 'title', body: 'body' }];
 

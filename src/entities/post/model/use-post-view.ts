@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
-import { IMAGE_SIZE } from '../config/imageSizes';
-import { buildImageUrl } from '../lib/buildImageUrl';
+import { IMAGE_SIZE } from '../config/image-sizes';
+import { buildImageUrl } from '../lib/build-image-url';
 import { selectDetails, selectPost } from './selectors';
 import { usePostStore } from './store';
 

@@ -5,7 +5,7 @@ import {
   type StateStorage,
 } from 'zustand/middleware';
 
-import { createHydrationTracker } from './createHydrationTracker';
+import { createHydrationTracker } from './create-hydration-tracker';
 
 const KEY = 'test-store';
 

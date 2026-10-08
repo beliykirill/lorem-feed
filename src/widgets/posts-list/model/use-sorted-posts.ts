@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { useFavoriteStore } from '@/entities/favorite';
 import { usePostStore } from '@/entities/post';
 
-import { sortPosts } from './sortPosts';
+import { sortPosts } from './sort-posts';
 
 export function useSortedPosts() {
   const posts = usePostStore(state => state.posts);

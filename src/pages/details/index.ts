@@ -1,1 +1,1 @@
-export { DetailsScreen } from './ui/DetailsScreen';
+export { DetailsScreen } from './ui/details-screen';

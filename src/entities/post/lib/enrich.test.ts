@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker/locale/base';
 
-import { buildImageUrl } from './buildImageUrl';
+import { buildImageUrl } from './build-image-url';
 import { enrichPosts, SEED_LENGTH, toPostDetails } from './enrich';
 
 const dtos = [1, 2, 3].map(id => ({

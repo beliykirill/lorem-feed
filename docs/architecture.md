@@ -361,13 +361,13 @@ sequenceDiagram
 
 | Файл | Что проверяет |
 |------|---------------|
-| `widgets/posts-list/model/sortPosts.test.ts` | избранные сверху; между собой по `addedAt` по убыванию; неизбранные в исходном порядке; после удаления из избранного пост возвращается на исходное место; входной массив не мутирует |
-| `features/load-posts/model/loadPosts.test.ts` | успех → `savePostList` вызван один раз, повторный вызов не запрашивает и не вызывает `savePostList` (обогащение не перезапускается); `fetchPosts` бросает (сеть, HTTP, невалидная структура — валидация внутри `fetchPosts`, сама она проверяется в `validate.test.ts`) → `error`, ничего не сохранено, флаг не стоит, повтор запрашивает; пустой массив → `empty`, флаг не стоит; повторный вызов во время `loading` не создаёт второй запрос |
+| `widgets/posts-list/model/sort-posts.test.ts` | избранные сверху; между собой по `addedAt` по убыванию; неизбранные в исходном порядке; после удаления из избранного пост возвращается на исходное место; входной массив не мутирует |
+| `features/load-posts/model/load-posts.test.ts` | успех → `savePostList` вызван один раз, повторный вызов не запрашивает и не вызывает `savePostList` (обогащение не перезапускается); `fetchPosts` бросает (сеть, HTTP, невалидная структура — валидация внутри `fetchPosts`, сама она проверяется в `validate.test.ts`) → `error`, ничего не сохранено, флаг не стоит, повтор запрашивает; пустой массив → `empty`, флаг не стоит; повторный вызов во время `loading` не создаёт второй запрос |
 | `entities/post/lib/validate.test.ts` | `validatePosts`: не массив → ошибка; элемент без числового `id` или без строковых `title`, `body` → ошибка; корректный ответ → валиден; пустой массив → валиден (структуру проверяет валидация, пустоту — `loadPosts`); лишние поля (`userId`) не мешают и в результат не копируются (валидатор возвращает новый объект). `validatePost(data, expectedId)` — те же правила для одного объекта, плюс `id ≠ expectedId` → ошибка. Тест чистой функции в `lib`: исключение R-13 касается только api-слоя |
 | `entities/post/lib/enrich.test.ts` | `enrichPosts` (вход — `ValidatedPostDto[]`): у каждого поста есть seed; `thumbnailUrl` = `buildImageUrl(seed, 32, 32)`; seed разные у разных постов. `toPostDetails(dto, post)`: `imageUrl` = `buildImageUrl(post.seed, 300, 300)`. Вместе: URL 32 и 300 строятся из одного seed. `faker.seed` фиксирован. Тест импортирует внутренний модуль своего слайса относительным путём (`./enrich`) |
-| `features/load-post-details/model/loadPostDetails.test.ts` | в кэше по `postId` → запроса нет; ошибка → ничего не сохранено, следующий вызов запрашивает; `fetchPost` отклонён из-за `id ≠ postId` → ничего не сохранено, следующий вызов запрашивает; успех → `savePostDetails(postId, dto)` вызван с запрошенным `postId`, следующий вызов не запрашивает; два параллельных вызова → один запрос |
-| `app/hydration/model/hydrationGate.test.ts` | `isGateOpen` (чистая): все трекеры завершены → `true`; хотя бы один нет → `false`; трекер «восстановлен после ошибки» считается завершённым. `createHydrationGate` (подписка): трекер завершился до подписки → `getSnapshot()` сразу `true` без события; завершение после подписки → подписчик уведомлён, снимок `true`; отписка снимает подписку со всех трекеров |
-| `shared/lib/storage/createHydrationTracker.test.ts` | на реальном `persist` из zustand 5.0.15, мок-хранилище передаётся в `createHydrationTracker(storage, key)` и в `persist`: битый JSON и исключение в `migrate` → ключ удалён, стор в начальном состоянии, `isDone() = true`; валидный JSON и пустое хранилище → данные применены, ключ не тронут, `isDone() = true` |
+| `features/load-post-details/model/load-post-details.test.ts` | в кэше по `postId` → запроса нет; ошибка → ничего не сохранено, следующий вызов запрашивает; `fetchPost` отклонён из-за `id ≠ postId` → ничего не сохранено, следующий вызов запрашивает; успех → `savePostDetails(postId, dto)` вызван с запрошенным `postId`, следующий вызов не запрашивает; два параллельных вызова → один запрос |
+| `app/hydration/model/hydration-gate.test.ts` | `isGateOpen` (чистая): все трекеры завершены → `true`; хотя бы один нет → `false`; трекер «восстановлен после ошибки» считается завершённым. `createHydrationGate` (подписка): трекер завершился до подписки → `getSnapshot()` сразу `true` без события; завершение после подписки → подписчик уведомлён, снимок `true`; отписка снимает подписку со всех трекеров |
+| `shared/lib/storage/create-hydration-tracker.test.ts` | на реальном `persist` из zustand 5.0.15, мок-хранилище передаётся в `createHydrationTracker(storage, key)` и в `persist`: битый JSON и исключение в `migrate` → ключ удалён, стор в начальном состоянии, `isDone() = true`; валидный JSON и пустое хранилище → данные применены, ключ не тронут, `isDone() = true` |
 
 ### 6.2 Lint-правила (ESLint из шаблона RN + `eslint-plugin-boundaries`, одобрен автором)
 
@@ -410,10 +410,10 @@ sequenceDiagram
 ### 6.3 Инвариант → проверка
 | Инвариант (`CLAUDE.md`) | Способ |
 |-------------------------|--------|
-| 1. `/posts` до первого успеха (непустой валидный список) | юнит-тесты: `loadPosts.test.ts` (флаг после успеха, повторного запроса нет; `[]` → `empty`; ошибка `fetchPosts` → `error`) и `validate.test.ts` (что считается невалидной структурой) |
-| 2. Seed один раз при обогащении, URL из seed, faker не при рендере | юнит-тест `enrich.test.ts`; «обогащение не перезапускается» — `loadPosts.test.ts`; «faker не при рендере» — структурная гарантия: faker импортируется только в `lib/enrich.ts` (lint `no-restricted-imports`), `enrichPosts` не экспортируется из слайса, глубокий импорт в чужой слайс запрещён (lint `eslint-plugin-boundaries`), поэтому снаружи обогащение доступно только через `savePostList`. «`savePostList` вызывается только в `features/load-posts`» — **договорённость с проверкой ревьюером**, lint-правила нет |
-| 3. `/posts/{id}` только без кэша, ошибка не сохраняется | юнит-тест `loadPostDetails.test.ts` |
-| 4. Решение о загрузке после гидрации | структурная гарантия: экраны и хуки загрузки существуют только внутри навигатора, а он рендерится после gate (4.1). Gate проверяют юнит-тесты `hydrationGate.test.ts` и `createHydrationTracker.test.ts` |
+| 1. `/posts` до первого успеха (непустой валидный список) | юнит-тесты: `load-posts.test.ts` (флаг после успеха, повторного запроса нет; `[]` → `empty`; ошибка `fetchPosts` → `error`) и `validate.test.ts` (что считается невалидной структурой) |
+| 2. Seed один раз при обогащении, URL из seed, faker не при рендере | юнит-тест `enrich.test.ts`; «обогащение не перезапускается» — `load-posts.test.ts`; «faker не при рендере» — структурная гарантия: faker импортируется только в `lib/enrich.ts` (lint `no-restricted-imports`), `enrichPosts` не экспортируется из слайса, глубокий импорт в чужой слайс запрещён (lint `eslint-plugin-boundaries`), поэтому снаружи обогащение доступно только через `savePostList`. «`savePostList` вызывается только в `features/load-posts`» — **договорённость с проверкой ревьюером**, lint-правила нет |
+| 3. `/posts/{id}` только без кэша, ошибка не сохраняется | юнит-тест `load-post-details.test.ts` |
+| 4. Решение о загрузке после гидрации | структурная гарантия: экраны и хуки загрузки существуют только внутри навигатора, а он рендерится после gate (4.1). Gate проверяют юнит-тесты `hydration-gate.test.ts` и `create-hydration-tracker.test.ts` |
 | 5. Нет pull-to-refresh и кнопки сброса | lint `no-restricted-syntax` (pull-to-refresh) и `no-restricted-properties` (`clearStorage`, `clearAll`). Остальное — **структурная гарантия с проверкой ревьюером**: в сторах нет action'а очистки, а `removeItem` вызывается только в трекере при ошибке гидрации (адаптер `StateStorage` реализует `removeItem → remove` по контракту `persist`, это не вызов). Lint этого не ловит: в коде это обычные `set` и `remove`. Поэтому гарантию проверяет ревьюер, пункт есть в его чеклисте |
 
 ## 7. Трассировка требований
@@ -429,7 +429,7 @@ sequenceDiagram
 | F-1 | `entities/post/api/fetchPosts`, `features/load-posts` |
 | F-2 | `entities/post/lib/enrich.ts`, `savePostList`, `PostCard` |
 | F-3, R-6 | `PostCard` (`isFavorite`: фон и `StarIcon`) |
-| F-4, R-5, I-6 | `widgets/posts-list/model/sortPosts` |
+| F-4, R-5, I-6 | `widgets/posts-list/model/sort-posts` |
 | F-5 | `pages/posts` (`onPostPress` → `navigate`), `app/navigation` |
 | F-6, R-3 | `entities/post/api/fetchPost`, `savePostDetails`, `features/load-post-details` |
 | F-7, R-2 | `buildImageUrl`, `usePostView`, `pages/details`, `shared/ui/RemoteImage`, `load-post-details` |

@@ -3,10 +3,10 @@
 import { faker } from '@faker-js/faker/locale/base';
 
 import type { ValidatedPostDto } from '../api/types';
-import { IMAGE_SIZE, THUMBNAIL_SIZE } from '../config/imageSizes';
+import { IMAGE_SIZE, THUMBNAIL_SIZE } from '../config/image-sizes';
 import type { Post, PostDetails } from '../model/types';
-import { buildImageUrl } from './buildImageUrl';
-import { mapPostDto } from './mapPostDto';
+import { buildImageUrl } from './build-image-url';
+import { mapPostDto } from './map-post-dto';
 
 export const SEED_LENGTH = 10;
 

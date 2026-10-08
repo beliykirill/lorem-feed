@@ -25,7 +25,7 @@ const fakerRestriction = {
 module.exports = {
   root: true,
   extends: '@react-native',
-  plugins: ['boundaries'],
+  plugins: ['boundaries', 'check-file'],
   settings: {
     'import/resolver': {
       typescript: { project: './tsconfig.json' },
@@ -48,6 +48,16 @@ module.exports = {
     ],
   },
   rules: {
+    'check-file/filename-naming-convention': [
+      'error',
+      { '**/*.{js,jsx,ts,tsx}': 'KEBAB_CASE' },
+      // load-posts.test.ts: only the part before the first dot is checked.
+      { ignoreMiddleExtensions: true },
+    ],
+    'check-file/folder-naming-convention': [
+      'error',
+      { 'src/**/': 'KEBAB_CASE' },
+    ],
     'no-restricted-imports': ['error', fakerRestriction],
     'no-restricted-syntax': [
       'error',

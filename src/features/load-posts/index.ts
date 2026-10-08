@@ -1,1 +1,1 @@
-export { useLoadPosts } from './model/useLoadPosts';
+export { useLoadPosts } from './model/use-load-posts';

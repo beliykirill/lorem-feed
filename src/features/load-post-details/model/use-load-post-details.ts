@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 import { fetchPost, savePostDetails, usePostStore } from '@/entities/post';
 
-import { loadPostDetails } from './loadPostDetails';
+import { loadPostDetails } from './load-post-details';
 
 const deps = {
   getDetails: (postId: number) => usePostStore.getState().detailsById[postId],

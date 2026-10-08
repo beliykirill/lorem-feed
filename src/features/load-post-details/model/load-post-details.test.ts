@@ -1,6 +1,6 @@
 import type { PostDetails, ValidatedPostDto } from '@/entities/post';
 
-import { loadPostDetails, type LoadPostDetailsDeps } from './loadPostDetails';
+import { loadPostDetails, type LoadPostDetailsDeps } from './load-post-details';
 
 const POST_ID = 7;
 const dto: ValidatedPostDto = { id: POST_ID, title: 'title', body: 'body' };

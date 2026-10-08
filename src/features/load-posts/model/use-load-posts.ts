@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react';
 
 import { fetchPosts, savePostList, usePostStore } from '@/entities/post';
 
-import { loadPosts } from './loadPosts';
+import { loadPosts } from './load-posts';
 
 const deps = { getState: usePostStore.getState, fetchPosts, savePostList };
 

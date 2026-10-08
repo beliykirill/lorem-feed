@@ -3,7 +3,7 @@ import { useSyncExternalStore } from 'react';
 import { favoriteStoreHydration } from '@/entities/favorite';
 import { postStoreHydration } from '@/entities/post';
 
-import { createHydrationGate } from './hydrationGate';
+import { createHydrationGate } from './hydration-gate';
 
 // One gate per app, created at module level: a stable subscribe for useSyncExternalStore.
 const hydrationGate = createHydrationGate([

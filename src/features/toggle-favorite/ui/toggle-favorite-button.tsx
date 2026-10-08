@@ -1,6 +1,6 @@
 import { Button } from 'react-native';
 
-import { useToggleFavorite } from '../model/useToggleFavorite';
+import { useToggleFavorite } from '../model/use-toggle-favorite';
 
 type Props = { postId: number };
 

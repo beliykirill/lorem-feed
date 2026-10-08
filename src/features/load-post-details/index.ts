@@ -1,1 +1,1 @@
-export { useLoadPostDetails } from './model/useLoadPostDetails';
+export { useLoadPostDetails } from './model/use-load-post-details';

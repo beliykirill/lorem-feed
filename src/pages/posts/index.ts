@@ -1,1 +1,1 @@
-export { PostsScreen } from './ui/PostsScreen';
+export { PostsScreen } from './ui/posts-screen';

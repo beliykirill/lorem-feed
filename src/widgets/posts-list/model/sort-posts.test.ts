@@ -1,6 +1,6 @@
 import type { Post } from '@/entities/post';
 
-import { sortPosts } from './sortPosts';
+import { sortPosts } from './sort-posts';
 
 const posts: Post[] = [1, 2, 3, 4, 5].map(id => ({
   id,
