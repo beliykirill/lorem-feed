@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/shared/theme';
 
+import { ErrorBoundary } from '../error-boundary/error-boundary';
 import { HydrationGate } from '../hydration/ui/hydration-gate';
 import { darkNavigationTheme, lightNavigationTheme } from './navigation-theme';
 
@@ -17,13 +18,15 @@ export function AppProviders({ children }: PropsWithChildren) {
     <SafeAreaProvider>
       {/* RN core StatusBar: Info.plist disables view-controller-based status bar appearance. */}
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      <HydrationGate>
-        <NavigationContainer
-          theme={isDark ? darkNavigationTheme : lightNavigationTheme}
-        >
-          {children}
-        </NavigationContainer>
-      </HydrationGate>
+      <ErrorBoundary>
+        <HydrationGate>
+          <NavigationContainer
+            theme={isDark ? darkNavigationTheme : lightNavigationTheme}
+          >
+            {children}
+          </NavigationContainer>
+        </HydrationGate>
+      </ErrorBoundary>
     </SafeAreaProvider>
   );
 }

@@ -23,7 +23,8 @@ src/
 ├── app/
 │   ├── index.ts                public API: App (импортирует корневой index.js)
 │   ├── App.tsx                 корневой компонент
-│   ├── providers/              SafeAreaProvider, NavigationContainer с темой
+│   ├── providers/              SafeAreaProvider, StatusBar, NavigationContainer с темой (navigation-theme.ts)
+│   ├── error-boundary/         ErrorBoundary: fallback «Try again» без сброса данных
 │   ├── navigation/             RootStack по RootStackParamList из shared/config
 │   └── hydration/
 │       ├── model/              isGateOpen (чистая), createHydrationGate, hydrationGate, useStoresHydrated
@@ -66,12 +67,12 @@ src/
 |-------|-------------|-------------------------|-------------|
 | `app` | провайдеры, навигация, тема по системной настройке (R-14), gate гидрации (R-9) | `App` — его импортирует корневой `index.js` и регистрирует через `AppRegistry` | `pages/*`, `entities/post`, `entities/favorite` (только трекеры гидрации), `shared/config`, `shared/theme` |
 | `pages/posts` | `PostsScreen`: рендерит `PostsList` и передаёт ему `onPostPress(id)`, который вызывает `navigate(ROUTES.Details, { postId })` (F-5). Навигацией управляют только страницы | `PostsScreen` | `widgets/posts-list`, `shared/config` |
-| `pages/details` | `DetailsScreen`: берёт `postId` из параметров маршрута, собирает данные поста, кнопку избранного и фоновую загрузку деталей (R-10) | `DetailsScreen` | `entities/post`, `features/toggle-favorite`, `features/load-post-details`, `shared/config`, `shared/ui` |
-| `widgets/posts-list` | `FlatList` с ключом `id` (I-7), без `refreshControl` (R-4); экраны loading / error / empty с Retry (I-1); сортировка (R-5, I-6). Получает `onPostPress(id)` пропсом, про навигацию не знает | `PostsList` | `features/load-posts`, `entities/post`, `entities/favorite`, `shared/ui` |
+| `pages/details` | `DetailsScreen`: берёт `postId` из параметров маршрута, собирает данные поста, кнопку избранного и фоновую загрузку деталей (R-10) | `DetailsScreen` | `entities/post`, `features/toggle-favorite`, `features/load-post-details`, `shared/config`, `shared/theme`, `shared/ui` |
+| `widgets/posts-list` | `FlatList` с ключом `id` (I-7), без `refreshControl` (R-4); экраны loading / error / empty с Retry (I-1); сортировка (R-5, I-6). Получает `onPostPress(id)` пропсом, про навигацию не знает | `PostsList` | `features/load-posts`, `entities/post`, `entities/favorite`, `shared/theme`, `shared/ui` |
 | `features/load-posts` | решение «загружать или нет», запрос, разбор пустого ответа, вызов `savePostList` (D-1, D-3, R-4) | `useLoadPosts` | `entities/post` |
 | `features/load-post-details` | проверка кэша, однократный запрос `/posts/{id}`, вызов `savePostDetails` (R-3) | `useLoadPostDetails` | `entities/post` |
-| `features/toggle-favorite` | кнопка-переключатель: текст, `StarIcon`, анимация (F-8, R-7, I-11) | `ToggleFavoriteButton` | `entities/favorite`, `shared/ui` |
-| `entities/post` | DTO и доменные типы, api, валидация ответа, маппер DTO → модель, обогащение seed'ом, `buildImageUrl`, стор, операции «обогатить и сохранить», `PostCard` (`isFavorite` — пропс, звезда через `StarIcon`) | типы, `usePostStore`, `postStoreHydration`, селекторы, `usePostView`, `fetchPosts`, `fetchPost`, `savePostList`, `savePostDetails`, `PostCard`. `enrichPosts`, `toPostDetails`, `mapPostDto`, `buildImageUrl` и валидаторы — внутренние, наружу не экспортируются | `shared` |
+| `features/toggle-favorite` | кнопка-переключатель: текст, `StarIcon`, анимация (F-8, R-7, I-11) | `ToggleFavoriteButton` | `entities/favorite`, `shared/theme`, `shared/ui` |
+| `entities/post` | DTO и доменные типы, api, валидация ответа, маппер DTO → модель, обогащение seed'ом, `buildImageUrl`, стор, операции «обогатить и сохранить», `PostCard` (`isFavorite` — пропс, звезда через `StarIcon`) | типы, `usePostStore`, `postStoreHydration`, селекторы, `usePostView`, `fetchPosts`, `fetchPost`, `savePostList`, `savePostDetails`, `PostCard`, `IMAGE_SIZE`. `enrichPosts`, `toPostDetails`, `mapPostDto`, `buildImageUrl` и валидаторы — внутренние, наружу не экспортируются | `shared` |
 | `entities/favorite` | стор избранного `Record<id, addedAt>` (R-5, D-4) | типы, `useFavoriteStore`, `favoriteStoreHydration`, селекторы | `shared` |
 | `shared/api` | `fetchJson(url)`: GET, проверка `response.ok`, `JSON.parse`. Возвращает `unknown`, про сущности не знает (I-8) | `fetchJson`, `API_BASE_URL` | — |
 | `shared/config/navigation` | `RootStackParamList` (`Posts: undefined`, `Details: { postId: number }`) и константы `ROUTES`. Лежит в `shared`, чтобы `app` и `pages` импортировали типы маршрутов вниз | `RootStackParamList`, `ROUTES` | — |

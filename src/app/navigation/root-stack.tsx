@@ -9,8 +9,16 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export function RootStack() {
   return (
     <Stack.Navigator initialRouteName={ROUTES.Posts}>
-      <Stack.Screen name={ROUTES.Posts} component={PostsScreen} />
-      <Stack.Screen name={ROUTES.Details} component={DetailsScreen} />
+      <Stack.Screen
+        name={ROUTES.Posts}
+        component={PostsScreen}
+        options={{ title: 'Posts' }}
+      />
+      <Stack.Screen
+        name={ROUTES.Details}
+        component={DetailsScreen}
+        options={{ title: 'Post' }}
+      />
     </Stack.Navigator>
   );
 }

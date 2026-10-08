@@ -544,3 +544,10 @@
 - `ScrollView` с фоном темы и нижним отступом `insets.bottom + spacing.xl`; картинка 300×300 по центру (декоративная, скрыта от скринридера), `title`, `body`, под текстом кнопка избранного.
 - Пост не найден (путь недостижим: детали открываются только из списка) — `StateView` «Post not found» вместо прежнего `Post ${postId}`. Решение агента.
 - `ToggleFavoriteButton`: `Animated.View` со scale 1 → 0.95 на `onPressIn` (`timing`, 80 мс) и `spring` обратно на `onPressOut`, `useNativeDriver`. Неизбранное — контурная кнопка «☆ Add to favorites», избранное — залитая «★ In favorites». `accessibilityRole="button"`, `accessibilityState={{ selected }}`.
+
+### 6.4 ErrorBoundary, заголовки, доводка
+- `app/error-boundary`: классовый компонент, fallback через `StateView` — «Something went wrong» + «Try again». Кнопка только сбрасывает состояние границы и перерисовывает дерево, сторы не трогает (инвариант 5). В dev ошибка логируется.
+- Порядок в `AppProviders`: `SafeAreaProvider > StatusBar + ErrorBoundary > HydrationGate > NavigationContainer`. Gate по-прежнему оборачивает навигацию (инвариант 4). После «Try again» навигация пересоздаётся и открывается список — это приемлемо.
+- Заголовки: «Posts» и «Post» (`options.title` в `root-stack`).
+- `docs/architecture.md`: в дереве 1.2 появились `error-boundary` и `navigation-theme`, в таблице 1.3 — импорты `shared/theme` и `IMAGE_SIZE` в public API `entities/post`.
+- Ревьюер: блокирующих нарушений нет. Три мелких замечания по документации (нет записи 6.4 в журнале, таблица 1.3 отстала от кода) исправлены в этом подшаге.
