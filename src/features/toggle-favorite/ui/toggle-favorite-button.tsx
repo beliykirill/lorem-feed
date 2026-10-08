@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Animated, Pressable, StyleSheet, Text } from 'react-native';
+import { Animated, Pressable } from 'react-native';
 
 import { useTheme } from '@/shared/theme';
 import { StarIcon } from '@/shared/ui';
@@ -8,61 +8,42 @@ import { useToggleFavorite } from '../model/use-toggle-favorite';
 
 type Props = { postId: number };
 
+const HIT_SLOP = 12;
+
 export function ToggleFavoriteButton({ postId }: Props) {
   const { isFavorite, toggle } = useToggleFavorite(postId);
-  const { colors, radius, spacing, typography } = useTheme();
+  const { colors } = useTheme();
   const scale = useRef(new Animated.Value(1)).current;
 
-  const pressIn = () =>
-    Animated.timing(scale, {
-      toValue: 0.95,
-      duration: 80,
-      useNativeDriver: true,
-    }).start();
+  const onPress = () => {
+    toggle();
+    scale.setValue(0.6);
 
-  const pressOut = () =>
     Animated.spring(scale, {
       toValue: 1,
-      friction: 4,
+      friction: 3,
+      tension: 160,
       useNativeDriver: true,
     }).start();
-
-  const label = isFavorite ? 'In favorites' : 'Add to favorites';
-  const foreground = isFavorite ? colors.onPrimary : colors.primary;
+  };
 
   return (
-    <Animated.View style={{ transform: [{ scale }] }}>
-      <Pressable
-        onPress={toggle}
-        onPressIn={pressIn}
-        onPressOut={pressOut}
-        accessibilityRole="button"
-        accessibilityLabel={label}
-        accessibilityState={{ selected: isFavorite }}
-        style={[
-          styles.button,
-          {
-            gap: spacing.sm,
-            paddingHorizontal: spacing.xl,
-            paddingVertical: spacing.md,
-            borderRadius: radius.lg,
-            borderColor: colors.primary,
-            backgroundColor: isFavorite ? colors.primary : colors.background,
-          },
-        ]}
-      >
-        <StarIcon filled={isFavorite} size={20} color={foreground} />
-        <Text style={[typography.title, { color: foreground }]}>{label}</Text>
-      </Pressable>
-    </Animated.View>
+    <Pressable
+      onPress={onPress}
+      hitSlop={HIT_SLOP}
+      accessibilityRole="button"
+      accessibilityLabel={
+        isFavorite ? 'Remove from favorites' : 'Add to favorites'
+      }
+      accessibilityState={{ selected: isFavorite }}
+    >
+      <Animated.View style={{ transform: [{ scale }] }}>
+        <StarIcon
+          filled={isFavorite}
+          size={24}
+          color={isFavorite ? colors.star : colors.text}
+        />
+      </Animated.View>
+    </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-  },
-});

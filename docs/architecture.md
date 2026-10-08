@@ -42,7 +42,7 @@ src/
 │   ├── load-post-details/
 │   │   └── model/              loadPostDetails, useLoadPostDetails
 │   └── toggle-favorite/
-│       ├── ui/                 ToggleFavoriteButton (Animated scale)
+│       ├── ui/                 ToggleFavoriteButton: звезда для headerRight (Animated scale)
 │       └── model/              useToggleFavorite
 ├── entities/
 │   ├── post/
@@ -71,7 +71,7 @@ src/
 | `widgets/posts-list` | `FlatList` с ключом `id` (I-7), без `refreshControl` (R-4); экраны loading / error / empty с Retry (I-1); сортировка (R-5, I-6). Получает `onPostPress(id)` пропсом, про навигацию не знает | `PostsList` | `features/load-posts`, `entities/post`, `entities/favorite`, `shared/theme`, `shared/ui` |
 | `features/load-posts` | решение «загружать или нет», запрос, разбор пустого ответа, вызов `savePostList` (D-1, D-3, R-4) | `useLoadPosts` | `entities/post` |
 | `features/load-post-details` | проверка кэша, однократный запрос `/posts/{id}`, вызов `savePostDetails` (R-3) | `useLoadPostDetails` | `entities/post` |
-| `features/toggle-favorite` | кнопка-переключатель: текст, `StarIcon`, анимация (F-8, R-7, I-11) | `ToggleFavoriteButton` | `entities/favorite`, `shared/theme`, `shared/ui` |
+| `features/toggle-favorite` | кнопка-переключатель для шапки DetailsScreen: `StarIcon` ☆/★, акцентный цвет, анимация, подпись для скринридера (F-8, R-7, I-11) | `ToggleFavoriteButton` | `entities/favorite`, `shared/theme`, `shared/ui` |
 | `entities/post` | DTO и доменные типы, api, валидация ответа, маппер DTO → модель, обогащение seed'ом, `buildImageUrl`, стор, операции «обогатить и сохранить», `PostCard` (`isFavorite` — пропс, звезда через `StarIcon`) | типы, `usePostStore`, `postStoreHydration`, селекторы, `usePostView`, `fetchPosts`, `fetchPost`, `savePostList`, `savePostDetails`, `PostCard`, `IMAGE_SIZE`. `enrichPosts`, `toPostDetails`, `mapPostDto`, `buildImageUrl` и валидаторы — внутренние, наружу не экспортируются | `shared` |
 | `entities/favorite` | стор избранного `Record<id, addedAt>` (R-5, D-4) | типы, `useFavoriteStore`, `favoriteStoreHydration`, селекторы | `shared` |
 | `shared/api` | `fetchJson(url)`: GET, проверка `response.ok`, `JSON.parse`. Возвращает `unknown`, про сущности не знает (I-8) | `fetchJson`, `API_BASE_URL` | — |
@@ -302,7 +302,7 @@ sequenceDiagram
 - Детали других постов заранее не грузятся (R-3, I-7).
 
 ### 4.4 Переключение избранного
-1. `ToggleFavoriteButton({ postId })` читает `selectIsFavorite(postId)`: текст «Add to favorites» / «In favorites» и `StarIcon` с `filled` (R-7, I-11).
+1. `pages/details` ставит `ToggleFavoriteButton({ postId })` в шапку через `navigation.setOptions({ headerRight })`. Кнопка читает `selectIsFavorite(postId)`: `StarIcon` с `filled`, цвет `colors.star` у избранного, подпись «Add to favorites» / «Remove from favorites» (R-7, I-11).
 2. По нажатию — scale-анимация `Animated` и `toggle(postId)`: запись `postId → Date.now()` добавляется или удаляется, `persist` пишет в MMKV.
 3. `widgets/posts-list` подписан на оба стора через `useSortedPosts`. После возврата список уже пересортирован (I-5): `sortPosts(posts, favorites)` ставит избранные первыми по `addedAt` по убыванию, остальные идут в исходном порядке API (R-5, I-6). PostsScreen остаётся смонтированным в native-stack, поэтому позиция скролла сохраняется (R-14).
 
