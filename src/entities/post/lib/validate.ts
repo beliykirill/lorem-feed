@@ -12,11 +12,11 @@ function toValidatedPost(item: unknown): ValidatedPostDto {
   ) {
     throw new Error('Invalid post: id, title or body has a wrong type');
   }
-  // A new object: fields outside the model (userId) are dropped.
+  // Copy the fields: Pick narrows only the type, userId would stay in the object.
   return { id, title, body };
 }
 
-// Checks structure only. An empty array is valid here; load-posts rejects it.
+// An empty array is valid here: load-posts decides that it is not a success.
 export function validatePosts(data: unknown): ValidatedPostDto[] {
   if (!Array.isArray(data)) {
     throw new Error('Invalid posts response: not an array');

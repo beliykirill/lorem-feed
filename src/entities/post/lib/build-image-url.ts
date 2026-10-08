@@ -1,4 +1,4 @@
-// Pure: the same seed always gives the same picsum image.
+// picsum /seed/ URLs are deterministic: one seed gives one image in any size.
 export function buildImageUrl(
   seed: string,
   width: number,

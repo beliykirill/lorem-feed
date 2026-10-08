@@ -4,12 +4,11 @@ export type LoadPostDetailsDeps = {
   getDetails: (postId: number) => PostDetails | undefined;
   fetchPost: (postId: number) => Promise<ValidatedPostDto>;
   savePostDetails: (postId: number, dto: ValidatedPostDto) => void;
-  // Ids with a request in flight: a second call does not start another one.
+  // Dedupes concurrent calls, e.g. the StrictMode double effect.
   inFlight: Set<number>;
 };
 
-// Fetches /posts/{id} only while the details are not cached (invariant 3).
-// Errors are not shown and not stored: the next open retries.
+// Invariant 3. Errors are only logged (I-1): the next open retries.
 export async function loadPostDetails(
   postId: number,
   { getDetails, fetchPost, savePostDetails, inFlight }: LoadPostDetailsDeps,

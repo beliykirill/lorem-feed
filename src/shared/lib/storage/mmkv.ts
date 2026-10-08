@@ -3,7 +3,7 @@ import type { StateStorage } from 'zustand/middleware';
 
 const mmkv = createMMKV();
 
-// StateStorage adapter for zustand persist. MMKV is synchronous.
+// MMKV is synchronous, so persist hydrates inside create().
 export const mmkvStorage: StateStorage = {
   getItem: key => mmkv.getString(key) ?? null,
   setItem: (key, value) => mmkv.set(key, value),

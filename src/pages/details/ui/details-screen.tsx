@@ -8,8 +8,6 @@ import type { ROUTES, RootStackParamList } from '@/shared/config/navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, typeof ROUTES.Details>;
 
-// Placeholder for the data & state stage: the image, body and layout arrive
-// at the UI stage.
 export function DetailsScreen({ route }: Props) {
   const { postId } = route.params;
   const post = usePostView(postId);

@@ -7,8 +7,7 @@ import { usePostStore } from './store';
 
 export type PostView = { title: string; body: string; imageUrl: string };
 
-// Cached details win; otherwise the list post and a URL from its stored seed.
-// Two plain subscriptions: a selector returning a new object would loop.
+// Two plain subscriptions: a zustand selector returning a new object re-renders forever.
 export function usePostView(id: number): PostView | undefined {
   const post = usePostStore(selectPost(id));
   const details = usePostStore(selectDetails(id));

@@ -40,7 +40,6 @@ export const usePostStore = create<PostState>()(
       name: STORAGE_KEY,
       version: 1,
       storage: createJSONStorage(() => mmkvStorage),
-      // Statuses are transient and never persisted.
       partialize: ({ posts, isListLoaded, detailsById }) => ({
         posts,
         isListLoaded,

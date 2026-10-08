@@ -1,17 +1,17 @@
 import type { StateStorage } from 'zustand/middleware';
 
 export type HydrationTracker = {
-  // Pass to persist options. The returned callback runs after hydration.
-  // Generic so that it does not drive persist's state type inference.
+  // A factory: persist calls the returned callback after hydration.
+  // Generic, otherwise it makes persist infer the store state as unknown.
   onRehydrateStorage: <S>() => (state: S | undefined, error?: unknown) => void;
-  // Hydration finished: successfully or after recovery.
+  // Unlike persist.hasHydrated(), also true after recovery from an error.
   isDone: () => boolean;
   subscribe: (listener: () => void) => () => void;
 };
 
-// Tracks hydration of one persist store. On a hydration error the stored key is
-// removed: corrupt data counts as no data, and the store keeps its initial state.
-// The callback runs before create() returns, so it must not touch the store.
+// Corrupt data counts as no data: the key is removed, and zustand has already
+// left the store in its initial state. The callback runs before create()
+// returns, so it must not touch the store.
 export function createHydrationTracker(
   storage: StateStorage,
   storageKey: string,

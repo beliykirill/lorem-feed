@@ -13,8 +13,6 @@ import { useSortedPosts } from '../model/use-sorted-posts';
 
 type Props = { onPostPress: (postId: number) => void };
 
-// Placeholder for the data & state stage: PostCard, StateView and styling
-// arrive at the UI stage.
 export function PostsList({ onPostPress }: Props) {
   const { status, isListLoaded, retry } = useLoadPosts();
   const posts = useSortedPosts();

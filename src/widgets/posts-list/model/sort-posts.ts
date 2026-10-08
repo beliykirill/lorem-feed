@@ -3,8 +3,6 @@ import type { Post } from '@/entities/post';
 
 export type SortedPost = Post & { isFavorite: boolean };
 
-// Favorites first, most recently added on top; the rest keep the API order.
-// Does not mutate the input.
 export function sortPosts(
   posts: readonly Post[],
   favorites: FavoritesMap,

@@ -4,8 +4,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { HydrationGate } from '../hydration/ui/hydration-gate';
 
-// The navigation container, and with it every screen and loading hook,
-// renders only after the hydration gate opens (invariant 4).
+// Invariant 4: the gate wraps the navigation container, so no screen or
+// loading hook exists before every store has hydrated.
 export function AppProviders({ children }: PropsWithChildren) {
   return (
     <SafeAreaProvider>

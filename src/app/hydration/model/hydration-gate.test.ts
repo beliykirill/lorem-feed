@@ -33,7 +33,7 @@ describe('isGateOpen', () => {
   });
 
   it('treats a tracker recovered after a hydration error as done', () => {
-    // A real tracker sets the same flag after recovery, see createHydrationTracker.test.ts.
+    // A real tracker sets the same flag after recovery, see create-hydration-tracker.test.ts.
     const recovered = createFakeTracker();
     recovered.finish();
     expect(isGateOpen([createFakeTracker(true), recovered])).toBe(true);

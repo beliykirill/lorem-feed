@@ -2,7 +2,7 @@ import type { ValidatedPostDto } from '../api/types';
 import { enrichPosts, toPostDetails } from '../lib/enrich';
 import { usePostStore } from './store';
 
-// Enrich and save. The only way out of the slice to the enrichment.
+// Invariant 2: the only way to the enrichment from outside the slice.
 export function savePostList(dtos: ValidatedPostDto[]): void {
   usePostStore.getState().saveList(enrichPosts(dtos));
 }
