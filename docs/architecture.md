@@ -74,7 +74,7 @@ src/
 | `features/toggle-favorite` | кнопка-переключатель для шапки DetailsScreen: `StarIcon` ☆/★, цвет `colors.text` → `colors.star`, анимация, подпись для скринридера (F-8, R-7, I-11) | `ToggleFavoriteButton` | `entities/favorite`, `shared/theme`, `shared/ui` |
 | `entities/post` | DTO и доменные типы, api, валидация ответа, маппер DTO → модель, обогащение seed'ом, `buildImageUrl`, стор, операции «обогатить и сохранить», `PostCard` (`isFavorite` — пропс, звезда через `StarIcon`) | типы, `usePostStore`, `postStoreHydration`, селекторы, `usePostView`, `fetchPosts`, `fetchPost`, `savePostList`, `savePostDetails`, `PostCard`, `IMAGE_SIZE`. `enrichPosts`, `toPostDetails`, `mapPostDto`, `buildImageUrl` и валидаторы — внутренние, наружу не экспортируются | `shared` |
 | `entities/favorite` | стор избранного `Record<id, addedAt>` (R-5, D-4) | типы, `useFavoriteStore`, `favoriteStoreHydration`, селекторы | `shared` |
-| `shared/api` | `fetchJson(url)`: GET, проверка `response.ok`, `JSON.parse`. Возвращает `unknown`, про сущности не знает (I-8) | `fetchJson`, `API_BASE_URL` | — |
+| `shared/api` | `fetchJson(url)`: GET, проверка `response.ok`, `response.json()`. Возвращает `unknown`, про сущности не знает (I-8) | `fetchJson`, `API_BASE_URL` | — |
 | `shared/config/navigation` | `RootStackParamList` (`Posts: undefined`, `Details: { postId: number }`) и константы `ROUTES`. Лежит в `shared`, чтобы `app` и `pages` импортировали типы маршрутов вниз | `RootStackParamList`, `ROUTES` | — |
 | `shared/lib/storage` | `createMMKV()`, адаптер `StateStorage` (`getItem → getString(key) ?? null`, `setItem → set`, `removeItem → remove`), `createHydrationTracker(storage, key)` (3.3). Трекер получает хранилище аргументом и к MMKV не привязан (I-8) | `mmkvStorage`, `createHydrationTracker`, тип `HydrationTracker` | — |
 | `shared/theme` | палитры `lightColors` / `darkColors`, токены `spacing`, `radius`, `typography`, `useTheme` на `useColorScheme` (R-14). Акцент избранного — `colors.star`, оттенок строки — `favoriteTint` (8% от `star`), отклик на нажатие — `pressed`; `primary` — для кнопок (R-6, R-7, R-14) | `useTheme`, тип `Theme`, `lightColors`, `darkColors` (нужны `app` для темы навигации), тип `Colors`, токены `spacing`, `radius`, `typography` | — |
@@ -84,7 +84,7 @@ src/
 
 **Почему `PostCard` получает `isFavorite` пропсом.** Тогда `entities/post` не зависит от `entities/favorite`, и связь двух сущностей остаётся в одном месте — в `widgets/posts-list`.
 
-**Почему `enrichPosts` не в public API.** Снаружи слайса нельзя вызвать `enrichPosts` и faker напрямую, только через операцию «обогатить и сохранить». Глубокий импорт `entities/post/lib/...` запрещён lint-правилом (6.2), так что это структурная гарантия. Где вызывается сам `savePostList` (только в `features/load-posts` после успешного непустого ответа), lint не ограничивает: это договорённость, её проверяет ревьюер (6.3).
+**Почему `enrichPosts` не в public API.** Снаружи слайса нельзя вызвать `enrichPosts` и faker напрямую, только через операцию «обогатить и сохранить». Глубокий импорт `entities/post/lib/...` запрещён lint-правилом (6.2), так что это структурная гарантия. Где вызывается сам `savePostList` (только в `features/load-posts` после успешного непустого ответа), lint не ограничивает: это договорённость, её проверяет ревьюер (6.3). Так же и с сырыми action'ами `saveList` / `saveDetails`: `usePostStore` публичный, поэтому через `getState()` они доступны снаружи, а то, что их не вызывают в обход `savePostList` / `savePostDetails`, — договорённость с проверкой ревьюером (R-10).
 
 **`StarIcon`.** `Text` с символом ★ (U+2605) при `filled` или ☆ (U+2606), пропсы `filled`, `size`, `color`, цвет по умолчанию из темы. Именно эти символы, а не эмодзи ⭐: эмодзи не перекрашивается. Новых зависимостей нет (R-6, R-7).
 
@@ -320,7 +320,7 @@ sequenceDiagram
 | Повреждён `post-store` | `idle` | ключ удалён (3.3) | как при первом запуске, избранное сохранено |
 | Повреждён `favorite-store` | — | ключ удалён (3.3) | список как обычно, избранное пустое |
 
-Тексты экранов окончательно выбираются на этапе UI. Retry вызывает `loadPosts` повторно. `listStatus` не персистится, поэтому после перезапуска с незагруженным списком загрузка начнётся заново.
+Тексты экранов — как в таблице. Retry вызывает `loadPosts` повторно. `listStatus` не персистится, поэтому после перезапуска с незагруженным списком загрузка начнётся заново.
 
 ## 5. ADR
 
@@ -328,7 +328,7 @@ sequenceDiagram
 - **Контекст.** Нужен state-manager (T-5) и хранение между запусками (D-3, D-4). Данные загружаются один раз, кэш запросов с инвалидацией не нужен.
 - **Решение.** Zustand 5 с middleware `persist`. Хранилище — `react-native-mmkv` v4 через адаптер `StateStorage`. Два стора, по одному на сущность, у каждого свой ключ, `version` и трекер гидрации (R-9).
 - **Альтернативы.** Redux Toolkit + redux-persist: больше шаблонного кода, отдельная гидрация через `PersistGate`. AsyncStorage: асинхронный, гидрация после первого рендера, больше окно для гонки «запрос до гидрации». Один общий стор: одна гидрация, но стор знает обо всех сущностях и не ложится на FSD-слайсы.
-- **Последствия.** Гидрация синхронная, но gate остаётся явным. `hasHydrated()` при ошибке гидрации навсегда `false`, поэтому нужен собственный трекер (3.3). MMKV — нативный модуль: в Jest нужен мок (`createMockMMKV`), сборка с RN 0.87.1 проверена на этапе каркаса 2026-10-08: iOS (симулятор) и Android (эмулятор) собираются и запускаются (R-9).
+- **Последствия.** Гидрация синхронная, но gate остаётся явным. `hasHydrated()` при ошибке гидрации навсегда `false`, поэтому нужен собственный трекер (3.3). MMKV — нативный модуль. Мок в Jest (`createMockMMKV`) не понадобился: логика тестируется через DI, MMKV в тесты не импортируется. Сборка с RN 0.87.1 проверена на этапе каркаса 2026-10-08: iOS (симулятор) и Android (эмулятор) собираются и запускаются (R-9).
 
 ### ADR-2. Feature-Sliced Design
 - **Контекст.** T-6 требует разделить UI, логику и состояние. Приложение маленькое, но проверяющий оценивает архитектуру.
@@ -346,7 +346,7 @@ sequenceDiagram
 - **Контекст.** S-2: установка одной командой, воспроизводимо у проверяющего (I-10).
 - **Решение.** Yarn 4 через Corepack, версия в `packageManager`, `nodeLinker: node-modules`, `pod install` в `postinstall` только на macOS (R-11).
 - **Альтернативы.** npm: рабочий вариант, но выбран Yarn Berry (R-11). Yarn Classic: в режиме поддержки, новых версий нет. pnpm: изолированный `node_modules` на симлинках, для React Native обычно нужен `node-linker=hoisted`. Plug'n'Play: с React Native не работает (R-11).
-- **Последствия.** Проверяющему нужен включённый Corepack (`corepack enable`), это будет в README. Флаги Yarn Classic (например, `-s`) не работают: см. журнал этапа 2.
+- **Последствия.** Релиз Yarn 4.18.1 лежит в репозитории (`.yarn/releases`, `yarnPath`), поэтому Corepack у проверяющего не обязателен, подойдёт и глобальный Yarn 1 (README, «Окружение»). Флаги Yarn Classic (например, `-s`) не работают: см. журнал этапа 2.
 
 ### ADR-5. Без TanStack Query (и RTK Query)
 - **Контекст.** Оба запроса однократные, данные хранятся вечно, рефетча, инвалидации и фоновых обновлений нет (D-1, R-3, R-4).
@@ -442,7 +442,7 @@ sequenceDiagram
 | F-6, R-3 | `entities/post/api/fetchPost`, `savePostDetails`, `features/load-post-details` |
 | F-7, R-2 | `buildImageUrl`, `usePostView`, `pages/details`, `shared/ui/RemoteImage`, `load-post-details` |
 | F-8, R-7, I-11 | `features/toggle-favorite`, `shared/ui/StarIcon` |
-| D-1, R-4 | `features/load-posts` (`isListLoaded`, пустой ответ); `entities/post/lib` (`validatePosts`, `validatePost`, `mapPostDto`); `widgets/posts-list/ui` (error / empty + Retry); нет pull-to-refresh и сброса — lint 6.2, `PostsList` без `refreshControl`, плюс структурная гарантия с проверкой ревьюером (нет action'а очистки, `removeItem` только в трекере, 6.3); случайные картинки без `faker.seed(id)` — `entities/post/lib/enrich.ts`; инструкция по сбросу — README на финальном этапе |
+| D-1, R-4 | `features/load-posts` (`isListLoaded`, пустой ответ); `entities/post/lib` (`validatePosts`, `validatePost`, `mapPostDto`); `widgets/posts-list/ui` (error / empty + Retry); нет pull-to-refresh и сброса — lint 6.2, `PostsList` без `refreshControl`, плюс структурная гарантия с проверкой ревьюером (нет action'а очистки, `removeItem` только в трекере, 6.3); случайные картинки без `faker.seed(id)` — `entities/post/lib/enrich.ts`; инструкция по сбросу — README, «Допущения и сознательные решения» |
 | D-2, I-3, I-4 | `enrichPosts`, `toPostDetails`, `buildImageUrl`, `savePostList` |
 | D-3, I-2 | `persist` + `mmkvStorage`, `isListLoaded` |
 | D-4 | `entities/favorite` + gate в `app/hydration` |
@@ -454,9 +454,9 @@ sequenceDiagram
 | R-10 | раздел 1 |
 | R-11 | этап каркаса |
 | R-12, S-3…S-5 | `docs/ai/`, `CLAUDE.md`, `.claude/` |
-| R-13 | раздел 6, CI на этапе каркаса |
+| R-13 | раздел 6, CI (`.github/workflows/ci.yml`) |
 | R-14 | `shared/theme`, `shared/ui/RemoteImage`, native-stack (скролл); тексты UI на английском — все `ui`-сегменты, проверяет ревьюер |
-| S-1, S-2 | README и релиз на финальном этапе |
+| S-1, S-2 | README («Быстрый старт», «Готовый APK»), релиз v1.0.0 |
 
 T-1, T-2, T-7, I-9, I-10, R-11, S-1 и S-2 отображены на этапы, а не на модули `src/`: это требования к окружению, сборке и сдаче, их артефакты — конфиги и документы.
 
@@ -472,7 +472,7 @@ T-1, T-2, T-7, I-9, I-10, R-11, S-1 и S-2 отображены на этапы,
 |---|--------|--------|-------------|
 | 1 | Отступ снизу `insets.bottom` (Android в режиме edge-to-edge: `edgeToEdgeEnabled=true`, targetSdk 36) у списка (`contentContainerStyle`) и у экрана деталей | `widgets/posts-list/ui`, `pages/details` | нет, `react-native-safe-area-context` уже есть |
 | 2 | `StatusBar` из RN core, `barStyle` по `useColorScheme`. Опция `statusBarStyle` из native-stack не подходит: в `Info.plist` стоит `UIViewControllerBasedStatusBarAppearance = false` | `app/providers` | нет |
-| 3 | Accessibility. Строка: `accessibilityRole="button"`, подпись — заголовок и «, favorite» для избранного; символ ★/☆ скрыт от скринридера. Кнопка избранного: `accessibilityRole="button"`, `accessibilityState={{ selected: isFavorite }}`. Картинка 300×300: `accessible={false}` | `entities/post/ui/PostCard`, `features/toggle-favorite`, `shared/ui/StarIcon`, `pages/details` | нет |
+| 3 | Accessibility. Строка: `accessibilityRole="button"`, подпись — заголовок и «, favorite» для избранного; символ ★/☆ скрыт от скринридера. Кнопка избранного: `accessibilityRole="button"`, `accessibilityState={{ selected: isFavorite }}`. Картинки декоративные: `accessible={false}` и скрытие от скринридера стоят в `RemoteImage`, то есть на всех картинках (32×32 и 300×300) | `entities/post/ui/PostCard`, `features/toggle-favorite`, `shared/ui/StarIcon`, `shared/ui/RemoteImage` | нет |
 | 4 | Тема в `NavigationContainer` (светлая и тёмная, из палитры `shared/theme`) — как в 1.3 | `app/providers`, `shared/theme` | нет |
 | 5 | `ScrollView` для текста на DetailsScreen | `pages/details` | нет |
 | 6 | Мемоизация строк: `React.memo(PostCard)` с примитивными пропсами (`title`, `body`, `thumbnailUrl`, `isFavorite`), стабильные `renderItem` и `onPress`. `sortPosts` создаёт новые объекты, поэтому в строку передаются поля, а не объект | `entities/post/ui`, `widgets/posts-list/ui` | нет |

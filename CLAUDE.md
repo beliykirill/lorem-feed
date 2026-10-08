@@ -17,7 +17,7 @@ Everything installed by the RN CLI template is approved; the approval rule appli
 - `eslint-plugin-boundaries` 7.2.0 (dev, FSD import rules; approved 2026-10-08)
 - `babel-plugin-module-resolver` 5.0.3, `eslint-import-resolver-typescript` 4.4.5 (dev, the `@/` alias; approved 2026-10-08)
 - `eslint-plugin-check-file` 2.8.0, `@stylistic/eslint-plugin` 3.1.0 (dev, code style rules; approved 2026-10-08). The last versions that support ESLint 8
-- Yarn 4.18.1 via Corepack, `nodeLinker: node-modules`
+- Yarn 4.18.1, shipped in the repo (`.yarn/releases`, `yarnPath` in `.yarnrc.yml`); Corepack is optional. `nodeLinker: node-modules`
 - Node `^22.13.0 || ^24.3.0` (`.nvmrc`: 24.14.0)
 
 ## Forbidden
